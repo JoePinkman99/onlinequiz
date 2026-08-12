@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Kancil Kira-Kira — Malaysian Maths Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<style>
+  :root{
+    --bg:#EAF4F4;
+    --bg2:#F6FBFA;
+    --ink:#16302B;
+    --teal:#0B7A75;
+    --teal-dark:#075853;
+    --marigold:#F4A300;
+    --hibiscus:#E94F64;
+    --purple:#6A4C93;
+    --blue:#1E88E5;
+    --green:#43A047;
+    --rust:#D84315;
+    --card:#FFFFFF;
+    --line:rgba(22,48,43,0.10);
+    --shadow: 0 10px 30px rgba(11,122,117,0.14);
+    --radius: 22px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top left, rgba(244,163,0,0.10), transparent 45%),
+      radial-gradient(ellipse at bottom right, rgba(233,79,100,0.10), transparent 45%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Nunito',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'Baloo 2',sans-serif;}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 2px 18px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-title{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;color:var(--teal-dark);}
+  .brand-sub{font-size:11px;color:var(--ink);opacity:0.55;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+  .icon-btn{
+    border:none;background:var(--card);width:38px;height:38px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);
+    font-size:17px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:24px;
+    margin-bottom:16px;
+    border:1px solid var(--line);
+  }
+  .screen{display:none;}
+  .screen.active{display:block;animation:fadeUp .35s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  .mascot-wrap{display:flex;justify-content:center;margin-bottom:6px;}
+  .mascot{width:86px;height:86px;font-size:56px;display:flex;align-items:center;justify-content:center;}
+  .speech{
+    background:var(--bg2);border:2px dashed var(--teal);border-radius:16px;
+    padding:12px 16px;font-weight:700;font-size:14.5px;color:var(--teal-dark);
+    text-align:center;margin-top:6px;
+  }
+
+  h2.section-title{font-size:22px;margin:0 0 4px;color:var(--teal-dark);}
+  p.lead{margin:0 0 18px;opacity:.75;font-size:14.5px;line-height:1.5;}
+
+  label{display:block;font-weight:800;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--teal-dark);margin:14px 0 6px;}
+  input[type=text],input[type=password],select{
+    width:100%;padding:13px 14px;border-radius:14px;border:2px solid var(--line);
+    font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;color:var(--ink);
+    background:var(--bg2);outline:none;transition:border-color .15s;
+  }
+  input[type=text]:focus,input[type=password]:focus,select:focus{border-color:var(--teal);}
+
+  .grade-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+  .grade-btn{
+    border:2px solid var(--line);background:var(--bg2);border-radius:16px;padding:14px 10px;
+    cursor:pointer;text-align:left;font-family:'Nunito',sans-serif;transition:transform .12s, box-shadow .12s;
+  }
+  .grade-btn:hover{transform:translateY(-2px);}
+  .grade-btn .g-num{font-family:'Baloo 2';font-weight:800;font-size:15px;}
+  .grade-btn .g-my{font-size:11.5px;opacity:.65;font-weight:700;}
+  .grade-btn.selected{box-shadow:0 0 0 3px var(--sel,var(--teal)) inset;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--teal);color:#fff;border:none;border-radius:16px;
+    padding:14px 22px;font-family:'Baloo 2';font-weight:700;font-size:16px;
+    cursor:pointer;width:100%;box-shadow:0 8px 20px rgba(11,122,117,0.30);
+    transition:transform .12s, box-shadow .12s;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+  .btn.secondary{background:var(--bg2);color:var(--teal-dark);box-shadow:none;border:2px solid var(--line);}
+  .btn.marigold{background:var(--marigold);box-shadow:0 8px 20px rgba(244,163,0,0.35);}
+  .btn.danger{background:#fff;color:var(--rust);border:2px solid var(--rust);box-shadow:none;}
+  .btn.small{padding:9px 14px;font-size:13px;width:auto;border-radius:12px;}
+  .row{display:flex;gap:10px;}
+  .row .btn{flex:1;}
+
+  .flower-meter{display:flex;justify-content:center;gap:10px;margin:22px 0 8px;flex-wrap:wrap;}
+  .flower{width:38px;height:38px;opacity:.25;transform:scale(.85);transition:all .3s;}
+  .flower.filled{opacity:1;transform:scale(1);}
+  .lobby-count{text-align:center;font-family:'Baloo 2';font-weight:800;font-size:17px;color:var(--teal-dark);margin-top:8px;}
+  .lobby-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px;}
+  .chip{background:var(--bg2);border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:800;font-size:13px;}
+  .pulse{animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+  .qtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .qtag{font-size:12px;font-weight:800;color:var(--teal-dark);background:var(--bg2);padding:5px 12px;border-radius:999px;}
+  .qtimer{font-family:'Baloo 2';font-weight:800;font-size:15px;color:var(--rust);}
+  .progressbar{height:8px;background:var(--bg2);border-radius:99px;overflow:hidden;margin-bottom:20px;}
+  .progressbar > div{height:100%;background:var(--marigold);border-radius:99px;transition:width .3s;}
+  .qtext{font-family:'Baloo 2';font-size:20px;font-weight:700;margin-bottom:18px;line-height:1.4;}
+  .choices{display:grid;gap:10px;}
+  .choice{
+    border:2px solid var(--line);background:var(--bg2);border-radius:16px;padding:14px 16px;
+    font-weight:800;font-size:15.5px;cursor:pointer;text-align:left;transition:all .15s;
+  }
+  .choice:hover{border-color:var(--teal);}
+  .choice.correct{background:#E4F6E6;border-color:var(--green);color:#1c5c22;}
+  .choice.wrong{background:#FCEAEC;border-color:var(--hibiscus);color:#9c2233;animation:shake .3s;}
+  .choice.disabled{pointer-events:none;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .feedback{margin-top:16px;padding:14px 16px;border-radius:14px;font-weight:700;font-size:14px;display:none;}
+  .feedback.show{display:block;animation:fadeUp .25s ease;}
+  .feedback.good{background:#E4F6E6;color:#1c5c22;}
+  .feedback.bad{background:#FCEAEC;color:#9c2233;}
+
+  .score-big{font-family:'Baloo 2';font-weight:800;font-size:54px;text-align:center;color:var(--teal-dark);margin:8px 0 2px;}
+  .score-label{text-align:center;opacity:.6;font-weight:700;margin-bottom:20px;}
+  table.leader{width:100%;border-collapse:collapse;margin-top:10px;}
+  table.leader th{text-align:left;font-size:11px;text-transform:uppercase;opacity:.55;padding:6px 8px;}
+  table.leader td{padding:10px 8px;border-top:1px solid var(--line);font-weight:700;font-size:14px;}
+  table.leader tr:first-child td{font-weight:800;}
+  .live-row{display:flex;justify-content:space-between;padding:8px 10px;border-radius:10px;background:var(--bg2);margin-bottom:6px;font-weight:700;font-size:13.5px;}
+  .live-row.me{outline:2px solid var(--teal);}
+
+  .footer-note{text-align:center;font-size:12px;opacity:.5;margin-top:24px;font-weight:700;}
+  .status-banner{
+    font-size:12.5px;font-weight:800;padding:9px 12px;border-radius:12px;margin-bottom:14px;
+    background:#FFF4E0;color:#8a5a00;display:none;
+  }
+  .status-banner.show{display:block;}
+  .status-banner.err{background:#FCEAEC;color:#9c2233;}
+  .status-banner.ok{background:#E4F6E6;color:#1c5c22;}
+  .helptext{font-size:12px;opacity:.55;margin-top:4px;line-height:1.5;}
+  a{color:var(--teal-dark);}
+
+  /* Admin tabs */
+  .admin-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+  .admin-tab-btn{
+    border:2px solid var(--line);background:var(--bg2);border-radius:12px;padding:9px 14px;
+    font-family:'Baloo 2';font-weight:700;font-size:13.5px;cursor:pointer;color:var(--ink);
+  }
+  .admin-tab-btn.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+  .admin-panel{display:none;}
+  .admin-panel.active{display:block;}
+  .connection-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ccc;margin-right:6px;}
+  .connection-dot.ok{background:var(--green);}
+  .connection-dot.bad{background:var(--rust);}
+  .grade-live-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:12px;background:var(--bg2);margin-bottom:8px;}
+  .grade-live-row .gname{font-weight:800;font-size:14px;}
+  .grade-live-row .gcounts{font-size:12.5px;font-weight:700;opacity:.7;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#F4A300"/></svg>
+      <div>
+        <div class="brand-title">Kancil Kira-Kira</div>
+        <div class="brand-sub">KSSR Maths Quiz</div>
+      </div>
+    </div>
+    <button class="icon-btn" onclick="openAdmin()" title="Admin">⚙️</button>
+  </div>
+
+  <div id="status-banner" class="status-banner"></div>
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="card">
+      <div class="mascot-wrap"><div class="mascot">🦌</div></div>
+      <div class="speech" id="mascot-line">Hi! I'm Kancil. Pick your name and grade to start playing maths games!</div>
+    </div>
+    <div class="card">
+      <h2 class="section-title">Join the game</h2>
+      <p class="lead">Choose a nickname (no password needed) and your grade, based on the Malaysian KSSR syllabus.</p>
+      <label>Nickname</label>
+      <input type="text" id="nickname-input" maxlength="16" placeholder="e.g. AliBoy, SiComel99">
+      <label>Grade / Tahun</label>
+      <div class="grade-grid" id="grade-grid"></div>
+      <div style="margin-top:20px" class="row">
+        <button class="btn secondary" onclick="startPractice()">🧪 Practice (solo)</button>
+        <button class="btn marigold" onclick="joinCompetition()">🏆 Join Competition</button>
+      </div>
+      <div class="helptext">Practice starts instantly, just for you. Competition puts you in a live lobby — as soon as <b>5 players</b> from your grade are waiting, a room forms automatically and everyone gets the same questions at the same time. Many rooms can run at once, so hundreds of players can be matched in parallel.</div>
+    </div>
+    <div class="card">
+      <h2 class="section-title" style="font-size:16px;">🏅 Leaderboard</h2>
+      <select id="leader-grade-select" onchange="loadLeaderboard()"></select>
+      <div id="leaderboard-box"><p class="helptext">Select a grade to view top scores.</p></div>
+    </div>
+  </div>
+
+  <!-- LOBBY -->
+  <div class="screen" id="screen-lobby">
+    <div class="card" style="text-align:center;">
+      <h2 class="section-title">Waiting for players…</h2>
+      <p class="lead" id="lobby-grade-label">Grade: —</p>
+      <div class="flower-meter" id="flower-meter"></div>
+      <div class="lobby-count" id="lobby-count">0 / 5 joined</div>
+      <div class="lobby-list" id="lobby-list"></div>
+      <div style="margin-top:22px">
+        <button class="btn secondary" onclick="leaveLobby()">Leave lobby</button>
+      </div>
+      <p class="helptext" id="lobby-refresh-note" style="margin-top:14px;">Live — updates instantly as players join, no refreshing needed.</p>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div class="screen" id="screen-countdown">
+    <div class="card" style="text-align:center;">
+      <div class="mascot-wrap"><div class="mascot pulse">🦌</div></div>
+      <h2 class="section-title">5 players ready!</h2>
+      <div class="score-big" id="countdown-num">5</div>
+      <p class="lead">Get ready to answer fast — quicker correct answers score more points!</p>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="card">
+      <div class="qtop">
+        <div class="qtag" id="q-tag">Question 1 / 10</div>
+        <div class="qtimer" id="q-timer">⏱ 15</div>
+      </div>
+      <div class="progressbar"><div id="q-progress" style="width:0%"></div></div>
+      <div class="qtext" id="q-text">Loading…</div>
+      <div class="choices" id="q-choices"></div>
+      <div class="feedback" id="q-feedback"></div>
+      <button class="btn marigold" id="q-next-btn" style="margin-top:16px;display:none;" onclick="nextQuestion()">Next ➜</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="screen-results">
+    <div class="card" style="text-align:center;">
+      <div class="mascot-wrap"><div class="mascot">🦌</div></div>
+      <div class="speech" id="result-mascot-line">Great job!</div>
+      <div class="score-big" id="result-score">0/10</div>
+      <div class="score-label">Points: <span id="result-points">0</span></div>
+      <button class="btn" onclick="backToHome()">Back to home</button>
+    </div>
+    <div class="card" id="room-results-card" style="display:none;">
+      <h2 class="section-title" style="font-size:16px;">⚡ This room, live</h2>
+      <div id="room-results-box"></div>
+    </div>
+    <div class="card">
+      <h2 class="section-title" style="font-size:16px;">🏅 All-time leaderboard</h2>
+      <div id="result-leaderboard-box"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="screen" id="screen-admin">
+    <div class="card">
+      <h2 class="section-title">⚙️ Admin</h2>
+      <p class="lead">Connect storage, watch live rooms across all grades, and manage the leaderboard archive.</p>
+      <div class="admin-tabs">
+        <button class="admin-tab-btn active" data-tab="connections" onclick="switchAdminTab('connections')">Connections</button>
+        <button class="admin-tab-btn" data-tab="live" onclick="switchAdminTab('live')">Live rooms</button>
+        <button class="admin-tab-btn" data-tab="tools" onclick="switchAdminTab('tools')">Tools</button>
+      </div>
+
+      <!-- CONNECTIONS PANEL -->
+      <div class="admin-panel active" id="admin-connections">
+        <h3 style="margin:0 0 4px;font-size:15px;"><span class="connection-dot" id="dot-firebase"></span>Firebase Realtime Database — live matchmaking</h3>
+        <p class="helptext">This handles the lobby, room formation, and synced countdown/questions. It's built for concurrent writes, so it's what lets hundreds of players join at once without collisions. Create a free project at <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a>, enable <b>Realtime Database</b>, and copy the web app config. For a hobby/community deployment, set the database rules to <code>{"rules":{".read":true,".write":true}}</code> — simple and open, fine for this scale but not for sensitive data.</p>
+        <label>API key</label>
+        <input type="text" id="fb-apiKey" placeholder="AIza...">
+        <label>Database URL</label>
+        <input type="text" id="fb-databaseURL" placeholder="https://your-project-default-rtdb.asia-southeast1.firebasedatabase.app">
+        <label>Project ID</label>
+        <input type="text" id="fb-projectId" placeholder="your-project-id">
+        <label>App ID</label>
+        <input type="text" id="fb-appId" placeholder="1:1234567890:web:abcdef">
+        <div class="row" style="margin-top:14px;">
+          <button class="btn secondary" onclick="testFirebase()">Test connection</button>
+          <button class="btn" onclick="saveFirebaseConfig()">Save</button>
+        </div>
+        <div id="fb-test-result" class="helptext"></div>
+
+        <hr style="border:none;border-top:1px solid var(--line);margin:22px 0;">
+
+        <h3 style="margin:0 0 4px;font-size:15px;"><span class="connection-dot" id="dot-github"></span>GitHub — durable leaderboard archive</h3>
+        <p class="helptext">Every finished score is saved as its own small file (no shared file to collide on), so it scales fine even with many players finishing at the same moment. Create a repo and a <a href="https://github.com/settings/tokens?type=beta" target="_blank">fine-grained personal access token</a> with <b>Contents: Read & write</b> on that repo. Saved only in this browser's storage.</p>
+        <label>GitHub username / org</label>
+        <input type="text" id="cfg-owner" placeholder="e.g. hafizwan">
+        <label>Repository name</label>
+        <input type="text" id="cfg-repo" placeholder="e.g. kancil-kira-data">
+        <label>Branch</label>
+        <input type="text" id="cfg-branch" placeholder="main" value="main">
+        <label>Personal access token</label>
+        <input type="password" id="cfg-token" placeholder="github_pat_...">
+        <div class="row" style="margin-top:14px;">
+          <button class="btn secondary" onclick="testGithub()">Test connection</button>
+          <button class="btn" onclick="saveGithubConfig()">Save</button>
+        </div>
+        <div id="cfg-test-result" class="helptext"></div>
+      </div>
+
+      <!-- LIVE ROOMS PANEL -->
+      <div class="admin-panel" id="admin-live">
+        <p class="lead">Real-time snapshot of players waiting and rooms in progress, per grade.</p>
+        <div id="admin-live-box"><p class="helptext">Connect Firebase to see live data.</p></div>
+      </div>
+
+      <!-- TOOLS PANEL -->
+      <div class="admin-panel" id="admin-tools">
+        <h3 style="margin:0 0 8px;font-size:15px;">Rebuild leaderboard index</h3>
+        <p class="helptext">Scores are stored one-file-per-score for scalability, so loading the leaderboard means listing many files. Rebuilding compiles a fast top-50 index per grade. Run this occasionally (e.g. daily) rather than on every load.</p>
+        <select id="tools-grade-select" style="margin-top:8px;"></select>
+        <button class="btn marigold small" style="margin-top:10px;" onclick="rebuildIndex()">Rebuild index for this grade</button>
+        <div id="tools-rebuild-result" class="helptext"></div>
+
+        <hr style="border:none;border-top:1px solid var(--line);margin:22px 0;">
+
+        <h3 style="margin:0 0 8px;font-size:15px;color:var(--rust);">Danger zone</h3>
+        <p class="helptext">Clears the live waiting list for a grade in Firebase (does not touch saved scores in GitHub).</p>
+        <select id="danger-grade-select" style="margin-top:8px;"></select>
+        <button class="btn danger small" style="margin-top:10px;" onclick="clearLobby()">Clear waiting list for this grade</button>
+      </div>
+
+      <div class="row" style="margin-top:22px;">
+        <button class="btn secondary" onclick="showScreen('screen-home')">Back to game</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Built for Malaysian preschool–Tahun 6 · KSSR-aligned practice questions</div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG & CONSTANTS
+============================================================ */
+const GRADES = [
+  {key:'preschool', label:'Preschool', my:'Prasekolah', color:'var(--marigold)'},
+  {key:'std1', label:'Standard 1', my:'Tahun 1', color:'var(--hibiscus)'},
+  {key:'std2', label:'Standard 2', my:'Tahun 2', color:'var(--teal)'},
+  {key:'std3', label:'Standard 3', my:'Tahun 3', color:'var(--purple)'},
+  {key:'std4', label:'Standard 4', my:'Tahun 4', color:'var(--blue)'},
+  {key:'std5', label:'Standard 5', my:'Tahun 5', color:'var(--green)'},
+  {key:'std6', label:'Standard 6', my:'Tahun 6', color:'var(--rust)'},
+];
+
+const QUESTION_TIME = 15;
+const LOBBY_SIZE = 5;
+const COUNTDOWN_MS = 6000;
+const QUIZ_LENGTH = 10;
+const LEADERBOARD_SCAN_LIMIT = 30; // recent score-files to scan when no index exists
+
+/* ============================================================
+   QUESTION BANKS (Malaysian KSSR-aligned, expand freely)
+============================================================ */
+const BANK = {
+  preschool: [
+    {q:"Count the stars: ⭐⭐⭐  How many stars?", choices:["2","3","4","5"], answer:"3", explain:"1, 2, 3 — there are 3 stars!"},
+    {q:"Which shape has 3 sides?", choices:["Circle","Square","Triangle","Star"], answer:"Triangle", explain:"A triangle always has exactly 3 straight sides."},
+    {q:"2 + 1 = ?", choices:["2","3","4","5"], answer:"3", explain:"Start at 2, count 1 more: 2, 3."},
+    {q:"Which number comes after 4?", choices:["3","5","6","7"], answer:"5", explain:"Counting up: 1,2,3,4,5 — after 4 comes 5."},
+    {q:"Which group has MORE? 🍎🍎🍎 or 🍎🍎", choices:["First group","Second group"], answer:"First group", explain:"3 apples is more than 2 apples."},
+    {q:"How many fingers on one hand?", choices:["4","5","6","10"], answer:"5", explain:"One hand has 5 fingers."},
+    {q:"Which shape is round with no corners?", choices:["Square","Circle","Triangle","Rectangle"], answer:"Circle", explain:"A circle is perfectly round and has no corners."},
+    {q:"1 + 1 = ?", choices:["1","2","3","4"], answer:"2", explain:"One plus one more makes two."},
+    {q:"Count: 🐟🐟🐟🐟 How many fish?", choices:["3","4","5","6"], answer:"4", explain:"1,2,3,4 — four fish!"},
+    {q:"Which is the smallest number?", choices:["5","2","8","3"], answer:"2", explain:"2 is the smallest number in the list."},
+    {q:"3 − 1 = ?", choices:["1","2","3","4"], answer:"2", explain:"Take 1 away from 3, and 2 is left."},
+    {q:"Which shape has 4 equal sides?", choices:["Triangle","Square","Circle","Oval"], answer:"Square", explain:"A square has 4 sides that are all the same length."},
+  ],
+  std1: [
+    {q:"45 + 3 = ?", choices:["46","47","48","49"], answer:"48", explain:"45, 46, 47, 48 — count on 3 from 45."},
+    {q:"Which number is between 27 and 29?", choices:["26","28","30","25"], answer:"28", explain:"28 sits right between 27 and 29."},
+    {q:"60 − 10 = ?", choices:["40","50","60","70"], answer:"50", explain:"Take away 1 ten from 6 tens leaves 5 tens = 50."},
+    {q:"How many sen make RM1?", choices:["10","50","100","1000"], answer:"100", explain:"100 sen = RM1 in Malaysian currency."},
+    {q:"The clock shows 3:00. What time is it?", choices:["Three o'clock","Three thirty","Two o'clock","Four o'clock"], answer:"Three o'clock", explain:"When the minute hand is on 12 and hour hand on 3, it's three o'clock."},
+    {q:"Which number is the largest: 34, 43, 24, 42?", choices:["34","43","24","42"], answer:"43", explain:"Compare the tens digit first — 4 tens is the biggest, and 43 > 42."},
+    {q:"7 + 8 = ?", choices:["14","15","16","17"], answer:"15", explain:"7 + 8 = 7 + 7 + 1 = 14 + 1 = 15."},
+    {q:"A triangle has how many sides?", choices:["2","3","4","5"], answer:"3", explain:"Tri- means three, so a triangle has 3 sides."},
+    {q:"90 − 20 = ?", choices:["60","70","80","50"], answer:"70", explain:"9 tens minus 2 tens leaves 7 tens = 70."},
+    {q:"What comes next: 10, 20, 30, __?", choices:["35","40","45","50"], answer:"40", explain:"The pattern adds 10 each time, so next is 40."},
+    {q:"5 + 5 + 5 = ?", choices:["10","15","20","25"], answer:"15", explain:"5 + 5 = 10, then 10 + 5 = 15."},
+    {q:"How many days are in a week?", choices:["5","6","7","8"], answer:"7", explain:"A week has 7 days: Sunday to Saturday."},
+  ],
+  std2: [
+    {q:"3 × 4 = ?", choices:["10","11","12","13"], answer:"12", explain:"3 groups of 4 = 4+4+4 = 12."},
+    {q:"What is half of 10?", choices:["4","5","6","8"], answer:"5", explain:"Splitting 10 into 2 equal parts gives 5 each."},
+    {q:"200 + 350 = ?", choices:["500","550","600","450"], answer:"550", explain:"200 + 350: add hundreds (2+3=5) and tens (0+50) = 550."},
+    {q:"12 ÷ 4 = ?", choices:["2","3","4","5"], answer:"3", explain:"4 groups of 3 make 12, so 12 ÷ 4 = 3."},
+    {q:"5 × 5 = ?", choices:["20","25","30","15"], answer:"25", explain:"5 groups of 5 = 25."},
+    {q:"Which fraction shows one quarter?", choices:["1/2","1/4","1/3","2/4"], answer:"1/4", explain:"One quarter means 1 out of 4 equal parts, written 1/4."},
+    {q:"The clock's minute hand points to 3. How many minutes is that?", choices:["5 minutes","10 minutes","15 minutes","20 minutes"], answer:"15 minutes", explain:"Each number on a clock face equals 5 minutes; 3 × 5 = 15."},
+    {q:"RM20 − RM8 = ?", choices:["RM10","RM11","RM12","RM13"], answer:"RM12", explain:"20 − 8 = 12, so it's RM12."},
+    {q:"700 − 250 = ?", choices:["400","450","500","550"], answer:"450", explain:"700 − 250: 700 − 200 = 500, then 500 − 50 = 450."},
+    {q:"4 × 6 = ?", choices:["20","22","24","26"], answer:"24", explain:"4 groups of 6 = 24."},
+    {q:"18 ÷ 2 = ?", choices:["7","8","9","10"], answer:"9", explain:"2 groups of 9 make 18."},
+    {q:"Which of these is an even number?", choices:["15","22","33","41"], answer:"22", explain:"Even numbers end in 0,2,4,6,8 — 22 ends in 2."},
+  ],
+  std3: [
+    {q:"6 × 7 = ?", choices:["40","42","44","48"], answer:"42", explain:"6 groups of 7 = 42."},
+    {q:"3450 + 2100 = ?", choices:["5450","5550","5650","5350"], answer:"5550", explain:"3450 + 2100: 3000+2000=5000, 450+100=550, total 5550."},
+    {q:"What is 0.5 written as a fraction?", choices:["1/2","1/4","1/5","2/5"], answer:"1/2", explain:"0.5 is exactly half, which is 1/2."},
+    {q:"81 ÷ 9 = ?", choices:["8","9","10","11"], answer:"9", explain:"9 groups of 9 make 81."},
+    {q:"Perimeter of a square with side 5cm = ?", choices:["10cm","15cm","20cm","25cm"], answer:"20cm", explain:"Perimeter = 4 × side = 4 × 5cm = 20cm."},
+    {q:"9 × 8 = ?", choices:["63","70","72","81"], answer:"72", explain:"9 groups of 8 = 72."},
+    {q:"8000 − 3500 = ?", choices:["4300","4400","4500","4600"], answer:"4500", explain:"8000 − 3500: 8000 − 3000 = 5000, then 5000 − 500 = 4500."},
+    {q:"Which is greater, 3/4 or 1/2?", choices:["3/4","1/2","They are equal"], answer:"3/4", explain:"3/4 = 0.75 and 1/2 = 0.5, so 3/4 is bigger."},
+    {q:"7 × 9 = ?", choices:["56","63","72","81"], answer:"63", explain:"7 groups of 9 = 63."},
+    {q:"2.5 + 1.5 = ?", choices:["3","3.5","4","4.5"], answer:"4", explain:"2.5 + 1.5: whole numbers 2+1=3, decimals 0.5+0.5=1, total 4."},
+    {q:"10 × 6 = ?", choices:["16","60","66","600"], answer:"60", explain:"10 groups of 6 = 60."},
+    {q:"How many centimetres are in a metre?", choices:["10","100","1000","10000"], answer:"100", explain:"1 metre = 100 centimetres."},
+  ],
+  std4: [
+    {q:"What is 25% of 200?", choices:["25","50","75","100"], answer:"50", explain:"25% means a quarter; 200 ÷ 4 = 50."},
+    {q:"Area of a rectangle 6cm × 4cm = ?", choices:["20cm²","24cm²","26cm²","30cm²"], answer:"24cm²", explain:"Area = length × width = 6 × 4 = 24cm²."},
+    {q:"Average of 4, 6, 8 = ?", choices:["5","6","7","8"], answer:"6", explain:"Add them: 4+6+8=18, divide by 3 numbers = 6."},
+    {q:"45000 + 12500 = ?", choices:["56500","57000","57500","58000"], answer:"57500", explain:"45000 + 12500 = 57500."},
+    {q:"3/4 written as a decimal = ?", choices:["0.25","0.5","0.75","0.8"], answer:"0.75", explain:"3 ÷ 4 = 0.75."},
+    {q:"12 × 12 = ?", choices:["124","134","144","154"], answer:"144", explain:"12 groups of 12 = 144."},
+    {q:"What is 10% of 500?", choices:["5","50","100","150"], answer:"50", explain:"10% means one tenth; 500 ÷ 10 = 50."},
+    {q:"90000 − 34500 = ?", choices:["54500","55000","55500","56000"], answer:"55500", explain:"90000 − 34500 = 55500."},
+    {q:"Perimeter of a rectangle 8cm × 3cm = ?", choices:["18cm","20cm","22cm","24cm"], answer:"22cm", explain:"Perimeter = 2 × (length + width) = 2 × 11 = 22cm."},
+    {q:"1/2 + 1/4 = ?", choices:["1/2","3/4","2/6","1"], answer:"3/4", explain:"1/2 = 2/4, so 2/4 + 1/4 = 3/4."},
+    {q:"144 ÷ 12 = ?", choices:["10","11","12","13"], answer:"12", explain:"12 groups of 12 make 144."},
+    {q:"Round 3456 to the nearest hundred", choices:["3400","3450","3500","3460"], answer:"3500", explain:"3456 is closer to 3500 than 3400."},
+  ],
+  std5: [
+    {q:"Ratio of 4 apples to 8 oranges in simplest form?", choices:["1:2","2:4","4:8","1:4"], answer:"1:2", explain:"Divide both sides by 4: 4:8 becomes 1:2."},
+    {q:"Volume of a cube with side 3cm = ?", choices:["9cm³","18cm³","27cm³","36cm³"], answer:"27cm³", explain:"Volume = side × side × side = 3×3×3 = 27cm³."},
+    {q:"What is 15% of 400?", choices:["40","50","60","70"], answer:"60", explain:"10% of 400 is 40, 5% is 20, so 15% = 40+20 = 60."},
+    {q:"560000 + 245000 = ?", choices:["785000","795000","805000","815000"], answer:"805000", explain:"560000 + 245000 = 805000."},
+    {q:"Average of 10, 20, 30, 40 = ?", choices:["20","25","30","35"], answer:"25", explain:"Sum = 100, divide by 4 numbers = 25."},
+    {q:"3/5 written as a percentage = ?", choices:["50%","60%","65%","70%"], answer:"60%", explain:"3/5 = 6/10 = 60%."},
+    {q:"900000 − 375000 = ?", choices:["515000","525000","535000","545000"], answer:"525000", explain:"900000 − 375000 = 525000."},
+    {q:"A pie chart shows 25% liked Maths, out of 80 students. How many liked Maths?", choices:["15","20","25","30"], answer:"20", explain:"25% of 80 is a quarter of 80, which is 20."},
+    {q:"0.6 × 100 = ?", choices:["6","60","600","0.6"], answer:"60", explain:"Multiplying a decimal by 100 moves the point 2 places right: 0.6 → 60."},
+    {q:"Simplify 6/8", choices:["1/2","3/4","2/3","5/6"], answer:"3/4", explain:"Divide top and bottom by 2: 6/8 becomes 3/4."},
+    {q:"Area of a triangle with base 10cm and height 6cm = ?", choices:["30cm²","40cm²","50cm²","60cm²"], answer:"30cm²", explain:"Area = ½ × base × height = ½ × 10 × 6 = 30cm²."},
+    {q:"7 × 8 × 2 = ?", choices:["106","112","118","124"], answer:"112", explain:"7×8=56, then 56×2=112."},
+  ],
+  std6: [
+    {q:"Solve for x: x + 15 = 40", choices:["20","25","30","35"], answer:"25", explain:"Subtract 15 from both sides: x = 40 − 15 = 25."},
+    {q:"Sum of angles in a triangle = ?", choices:["90°","180°","270°","360°"], answer:"180°", explain:"The three angles of any triangle always add up to 180°."},
+    {q:"If 3 pens cost RM6, how much do 5 pens cost?", choices:["RM8","RM9","RM10","RM12"], answer:"RM10", explain:"1 pen costs RM2 (RM6÷3), so 5 pens cost 5×RM2=RM10."},
+    {q:"2,450,000 + 3,675,000 = ?", choices:["6,025,000","6,125,000","6,225,000","6,325,000"], answer:"6,125,000", explain:"2,450,000 + 3,675,000 = 6,125,000."},
+    {q:"Solve for y: 3y = 27", choices:["6","7","8","9"], answer:"9", explain:"Divide both sides by 3: y = 27 ÷ 3 = 9."},
+    {q:"What is the diameter if the radius is 7cm?", choices:["7cm","10cm","14cm","21cm"], answer:"14cm", explain:"Diameter = 2 × radius = 2 × 7cm = 14cm."},
+    {q:"Convert 3/8 to a percentage", choices:["32.5%","35%","37.5%","40%"], answer:"37.5%", explain:"3 ÷ 8 = 0.375 = 37.5%."},
+    {q:"9,000,000 − 3,250,000 = ?", choices:["5,650,000","5,750,000","5,850,000","5,950,000"], answer:"5,750,000", explain:"9,000,000 − 3,250,000 = 5,750,000."},
+    {q:"A number is doubled, then 5 is added, to get 21. What is the number?", choices:["6","7","8","9"], answer:"8", explain:"Work backwards: 21−5=16, then 16÷2=8."},
+    {q:"Angles on a straight line add up to?", choices:["90°","180°","270°","360°"], answer:"180°", explain:"Any straight line forms an angle of 180°."},
+    {q:"Simplify the ratio 15:20", choices:["3:4","5:4","3:5","4:5"], answer:"3:4", explain:"Divide both sides by 5: 15:20 becomes 3:4."},
+    {q:"12 × 12 − 44 = ?", choices:["90","100","110","120"], answer:"100", explain:"12×12=144, then 144−44=100."},
+  ],
+};
+
+/* ============================================================
+   STATE
+============================================================ */
+let state = {
+  nickname: '', grade: null, mode: null,
+  quiz: [], qIndex: 0, score: 0, points: 0, answered: false,
+  timerHandle: null, timeLeft: QUESTION_TIME,
+  myWaitingKey: null, roomId: null, roomRef: null,
+  waitingListenerRef: null, roomsListenerRef: null,
+  serverOffset: 0,
+};
+
+const MASCOT_LINES_CORRECT = ["Betul! Great job!","You got it!","Hebat! That's correct!","Nice one, keep going!"];
+const MASCOT_LINES_WRONG = ["Not quite — here's the answer, and why.","Almost! Let's learn this one.","No worries, here's the trick."];
+
+function $(id){return document.getElementById(id);}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+function gradeInfo(key){ return GRADES.find(g=>g.key===key); }
+function pickRandom(arr,n){
+  const copy=[...arr]; const out=[];
+  while(out.length<n && copy.length){ const i=Math.floor(Math.random()*copy.length); out.push(copy.splice(i,1)[0]); }
+  return out;
+}
+function banner(msg, cls, timeoutMs){
+  const b=$('status-banner');
+  b.textContent=msg;
+  b.className='status-banner show'+(cls?(' '+cls):'');
+  if(timeoutMs){ setTimeout(()=>b.classList.remove('show'), timeoutMs); }
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function buildGradeGrid(){
+  const grid=$('grade-grid'); grid.innerHTML='';
+  GRADES.forEach(g=>{
+    const btn=document.createElement('button');
+    btn.className='grade-btn'; btn.style.setProperty('--sel', g.color);
+    btn.innerHTML=`<div class="g-num">${g.label}</div><div class="g-my">${g.my}</div>`;
+    btn.onclick=()=>{ document.querySelectorAll('.grade-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); state.grade=g.key; };
+    grid.appendChild(btn);
+  });
+}
+function buildSelect(id){
+  const sel=$(id); sel.innerHTML='';
+  GRADES.forEach(g=>{ const opt=document.createElement('option'); opt.value=g.key; opt.textContent=`${g.label} (${g.my})`; sel.appendChild(opt); });
+}
+buildGradeGrid();
+buildSelect('leader-grade-select');
+buildSelect('tools-grade-select');
+buildSelect('danger-grade-select');
+
+/* ============================================================
+   CONFIG — GitHub + Firebase, localStorage only
+============================================================ */
+function loadGithubConfig(){
+  return { owner: localStorage.getItem('kk_owner')||'', repo: localStorage.getItem('kk_repo')||'',
+    branch: localStorage.getItem('kk_branch')||'main', token: localStorage.getItem('kk_token')||'' };
+}
+function loadFirebaseConfig(){
+  return { apiKey: localStorage.getItem('kk_fb_apiKey')||'', databaseURL: localStorage.getItem('kk_fb_databaseURL')||'',
+    projectId: localStorage.getItem('kk_fb_projectId')||'', appId: localStorage.getItem('kk_fb_appId')||'' };
+}
+function fillConfigForms(){
+  const g=loadGithubConfig();
+  $('cfg-owner').value=g.owner; $('cfg-repo').value=g.repo; $('cfg-branch').value=g.branch||'main'; $('cfg-token').value=g.token;
+  const f=loadFirebaseConfig();
+  $('fb-apiKey').value=f.apiKey; $('fb-databaseURL').value=f.databaseURL; $('fb-projectId').value=f.projectId; $('fb-appId').value=f.appId;
+}
+fillConfigForms();
+
+function openAdmin(){
+  fillConfigForms();
+  refreshConnectionDots();
+  showScreen('screen-admin');
+  switchAdminTab('connections');
+}
+function switchAdminTab(tab){
+  document.querySelectorAll('.admin-tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
+  $('admin-'+tab).classList.add('active');
+  if(tab==='live'){ startAdminLiveView(); } else { stopAdminLiveView(); }
+}
+
+async function saveGithubConfig(){
+  localStorage.setItem('kk_owner', $('cfg-owner').value.trim());
+  localStorage.setItem('kk_repo', $('cfg-repo').value.trim());
+  localStorage.setItem('kk_branch', $('cfg-branch').value.trim()||'main');
+  localStorage.setItem('kk_token', $('cfg-token').value.trim());
+  await testGithub();
+}
+async function testGithub(){
+  $('cfg-test-result').textContent='Testing…';
+  const c=loadGithubConfig();
+  try{
+    const res=await fetch(`https://api.github.com/repos/${c.owner}/${c.repo}`, {headers: ghHeaders()});
+    const ok=res.ok;
+    $('cfg-test-result').textContent = ok ? '✅ Connected.' : '⚠️ Could not access repo. Check owner/repo/branch/token permissions.';
+    $('dot-github').classList.toggle('ok', ok); $('dot-github').classList.toggle('bad', !ok);
+  }catch(e){
+    $('cfg-test-result').textContent='⚠️ Network error reaching GitHub.';
+    $('dot-github').classList.add('bad');
+  }
+}
+
+function saveFirebaseConfig(){
+  localStorage.setItem('kk_fb_apiKey', $('fb-apiKey').value.trim());
+  localStorage.setItem('kk_fb_databaseURL', $('fb-databaseURL').value.trim());
+  localStorage.setItem('kk_fb_projectId', $('fb-projectId').value.trim());
+  localStorage.setItem('kk_fb_appId', $('fb-appId').value.trim());
+  fbApp=null; fbDb=null; // force re-init with new config
+  testFirebase();
+}
+async function testFirebase(){
+  $('fb-test-result').textContent='Testing…';
+  try{
+    const db=ensureFirebase();
+    if(!db){ $('fb-test-result').textContent='⚠️ Fill in all Firebase fields first.'; return; }
+    await db.ref('/.info/connected').once('value');
+    // try a harmless read
+    await db.ref('/lobbies').limitToFirst(1).once('value');
+    $('fb-test-result').textContent='✅ Connected.';
+    $('dot-firebase').classList.add('ok'); $('dot-firebase').classList.remove('bad');
+  }catch(e){
+    console.error(e);
+    $('fb-test-result').textContent='⚠️ Could not connect. Check config values and database rules (needs read/write access).';
+    $('dot-firebase').classList.add('bad'); $('dot-firebase').classList.remove('ok');
+  }
+}
+function refreshConnectionDots(){
+  const g=loadGithubConfig();
+  $('dot-github').classList.toggle('ok', !!(g.owner && g.repo && g.token));
+  const f=loadFirebaseConfig();
+  $('dot-firebase').classList.toggle('ok', !!(f.apiKey && f.databaseURL));
+}
+
+/* ============================================================
+   FIREBASE INIT
+============================================================ */
+let fbApp=null, fbDb=null;
+function ensureFirebase(){
+  const c=loadFirebaseConfig();
+  if(!c.apiKey || !c.databaseURL){ return null; }
+  if(fbDb) return fbDb;
+  try{
+    if(!fbApp){
+      fbApp = firebase.apps && firebase.apps.length ? firebase.apps[0] : firebase.initializeApp({
+        apiKey: c.apiKey, databaseURL: c.databaseURL, projectId: c.projectId, appId: c.appId,
+      });
+    }
+    fbDb = firebase.database(fbApp);
+    fbDb.ref('/.info/serverTimeOffset').on('value', snap=>{ state.serverOffset = snap.val()||0; });
+    return fbDb;
+  }catch(e){ console.error('Firebase init failed', e); return null; }
+}
+
+/* ============================================================
+   GITHUB CONTENTS API HELPERS
+============================================================ */
+function ghHeaders(){
+  const c=loadGithubConfig();
+  return { 'Authorization': `token ${c.token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
+}
+function ghBaseUrl(path){ const c=loadGithubConfig(); return `https://api.github.com/repos/${c.owner}/${c.repo}/contents/${path}`; }
+function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+function b64ToUtf8(b64){ return decodeURIComponent(escape(atob(b64.replace(/\n/g,'')))); }
+
+async function ghGetJson(path){
+  const c=loadGithubConfig();
+  try{
+    const res=await fetch(`${ghBaseUrl(path)}?ref=${encodeURIComponent(c.branch)}&_=${Date.now()}`, {headers: ghHeaders(), cache:'no-store'});
+    if(res.status===404){ return {json:null, sha:null}; }
+    if(!res.ok){ throw new Error('GET failed '+res.status); }
+    const data=await res.json();
+    if(Array.isArray(data)) return {json:data, sha:null}; // directory listing
+    return {json: JSON.parse(b64ToUtf8(data.content)), sha: data.sha};
+  }catch(e){ return {json:null, sha:null, error:e}; }
+}
+async function ghPutJson(path, jsonValue, message, useSha){
+  const c=loadGithubConfig();
+  const body={ message: message||`update ${path}`, content: utf8ToB64(JSON.stringify(jsonValue, null, 2)), branch: c.branch };
+  if(useSha){ const {sha}=await ghGetJson(path); if(sha) body.sha=sha; }
+  const res=await fetch(ghBaseUrl(path), {method:'PUT', headers: ghHeaders(), body: JSON.stringify(body)});
+  return res.ok;
+}
+
+/* Score files: one per submission, no read-modify-write needed => scales to concurrent finishers */
+function scorePath(grade, nickname, ts){
+  const safeName = String(nickname).replace(/[^a-zA-Z0-9_-]/g,'').slice(0,20) || 'player';
+  return `data/leaderboard/${grade}/${ts}_${safeName}.json`;
+}
+function indexPath(grade){ return `data/leaderboard-index/${grade}.json`; }
+function lobbyMirrorPath(grade){ return `data/lobby/${grade}.json`; } // optional archive, not used for live sync
+
+/* ============================================================
+   HOME ACTIONS
+============================================================ */
+function readNickname(){ return $('nickname-input').value.trim(); }
+function validateGithubOrWarn(){
+  const c=loadGithubConfig();
+  if(!c.owner || !c.repo || !c.token){ banner('⚠️ Connect GitHub in ⚙️ Admin so scores can be saved.', 'err', 6000); return false; }
+  return true;
+}
+function validateFirebaseOrWarn(){
+  const db=ensureFirebase();
+  if(!db){ banner('⚠️ Connect Firebase in ⚙️ Admin for live competition matchmaking.', 'err', 6000); return false; }
+  return true;
+}
+
+function startPractice(){
+  state.nickname = readNickname();
+  if(!state.nickname){ alert('Please enter a nickname.'); return; }
+  if(!state.grade){ alert('Please choose a grade.'); return; }
+  state.mode='practice'; state.roomId=null;
+  beginQuiz(pickRandom(BANK[state.grade], Math.min(QUIZ_LENGTH, BANK[state.grade].length)));
+}
+
+async function joinCompetition(){
+  state.nickname = readNickname();
+  if(!state.nickname){ alert('Please enter a nickname.'); return; }
+  if(!state.grade){ alert('Please choose a grade.'); return; }
+  if(!validateFirebaseOrWarn()) return;
+  state.mode='competition';
+  showScreen('screen-lobby');
+  $('lobby-grade-label').textContent = `Grade: ${gradeInfo(state.grade).label} (${gradeInfo(state.grade).my})`;
+  buildFlowerMeter(0);
+  await enterLobby();
+}
+
+function buildFlowerMeter(filled){
+  const wrap=$('flower-meter'); wrap.innerHTML='';
+  for(let i=0;i<LOBBY_SIZE;i++){
+    const f=document.createElement('div'); f.className='flower'+(i<filled?' filled':'');
+    f.innerHTML=`<svg viewBox="0 0 40 40"><g>
+      <circle cx="20" cy="10" r="7" fill="#E94F64"/><circle cx="30" cy="20" r="7" fill="#E94F64"/>
+      <circle cx="20" cy="30" r="7" fill="#E94F64"/><circle cx="10" cy="20" r="7" fill="#E94F64"/>
+      <circle cx="20" cy="20" r="6" fill="#F4A300"/></g></svg>`;
+    wrap.appendChild(f);
+  }
+}
+
+/* ---- Firebase-backed lobby: scales to many concurrent joiners per grade ---- */
+async function enterLobby(){
+  const db=ensureFirebase();
+  const waitingRef = db.ref(`lobbies/${state.grade}/waiting`);
+  const newRef = waitingRef.push({ nickname: state.nickname, joinedAt: firebase.database.ServerValue.TIMESTAMP });
+  state.myWaitingKey = newRef.key;
+
+  // Live view of the waiting list (instant updates, no polling)
+  state.waitingListenerRef = waitingRef;
+  waitingRef.on('value', snap=>{
+    const val = snap.val() || {};
+    renderLobbyWaiting(val);
+    tryFormRoom(state.grade);
+  });
+
+  // Listen for a room that includes me
+  const roomsRef = db.ref(`lobbies/${state.grade}/rooms`);
+  state.roomsListenerRef = roomsRef;
+  roomsRef.orderByChild('createdAt').limitToLast(25).on('child_added', snap=>{
+    const room = snap.val();
+    if(room && room.players && room.players[state.nickname] && !state.roomId){
+      state.roomId = snap.key;
+      state.roomRef = db.ref(`lobbies/${state.grade}/rooms/${snap.key}`);
+      detachLobbyListeners();
+      enterCountdown(room);
+    }
+  });
+}
+
+function renderLobbyWaiting(waitingObj){
+  const entries = Object.entries(waitingObj||{}).sort((a,b)=>(a[1].joinedAt||0)-(b[1].joinedAt||0));
+  buildFlowerMeter(Math.min(entries.length, LOBBY_SIZE));
+  $('lobby-count').textContent = `${entries.length} / ${LOBBY_SIZE} joined`;
+  const list=$('lobby-list'); list.innerHTML='';
+  entries.slice(0, LOBBY_SIZE).forEach(([key,p])=>{
+    const c=document.createElement('div'); c.className='chip';
+    c.textContent = p.nickname===state.nickname ? `${p.nickname} (you)` : p.nickname;
+    list.appendChild(c);
+  });
+}
+
+// Atomic room formation via Firebase transaction — safe under many concurrent callers
+function tryFormRoom(grade){
+  const db=ensureFirebase();
+  const waitingRef = db.ref(`lobbies/${grade}/waiting`);
+  let poppedEntries = null;
+  waitingRef.transaction(current=>{
+    poppedEntries = null;
+    if(!current) return current;
+    const entries = Object.entries(current).sort((a,b)=>(a[1].joinedAt||0)-(b[1].joinedAt||0));
+    if(entries.length < LOBBY_SIZE) return current;
+    const toPop = entries.slice(0, LOBBY_SIZE);
+    poppedEntries = toPop;
+    const remaining = {...current};
+    toPop.forEach(([key])=> delete remaining[key]);
+    return remaining;
+  }, (error, committed)=>{
+    if(error){ console.error('room formation transaction error', error); return; }
+    if(committed && poppedEntries && poppedEntries.length===LOBBY_SIZE){
+      const players={}; poppedEntries.forEach(([,p])=> players[p.nickname]=true);
+      const quiz = pickRandom(BANK[grade], Math.min(QUIZ_LENGTH, BANK[grade].length));
+      const startAt = Date.now() + state.serverOffset + COUNTDOWN_MS;
+      db.ref(`lobbies/${grade}/rooms`).push({
+        players, quiz, startAt, createdAt: firebase.database.ServerValue.TIMESTAMP, results: {},
+      });
+    }
+  });
+}
+
+function detachLobbyListeners(){
+  if(state.waitingListenerRef){ state.waitingListenerRef.off(); state.waitingListenerRef=null; }
+  if(state.roomsListenerRef){ state.roomsListenerRef.off(); state.roomsListenerRef=null; }
+}
+
+function leaveLobby(){
+  const db=ensureFirebase();
+  detachLobbyListeners();
+  if(db && state.myWaitingKey){
+    db.ref(`lobbies/${state.grade}/waiting/${state.myWaitingKey}`).remove().catch(()=>{});
+  }
+  state.myWaitingKey=null;
+  showScreen('screen-home');
+}
+
+function enterCountdown(room){
+  showScreen('screen-countdown');
+  const tick=()=>{
+    const secs = Math.max(0, Math.ceil((room.startAt - (Date.now()+state.serverOffset))/1000));
+    $('countdown-num').textContent = secs;
+    if(secs<=0){ clearInterval(cdHandle); beginQuiz(room.quiz); }
+  };
+  tick();
+  const cdHandle=setInterval(tick, 250);
+}
+
+/* ============================================================
+   QUIZ ENGINE
+============================================================ */
+function beginQuiz(questionSet){
+  state.quiz = questionSet; state.qIndex=0; state.score=0; state.points=0;
+  showScreen('screen-quiz'); renderQuestion();
+}
+
+function renderQuestion(){
+  state.answered=false;
+  const total=state.quiz.length; const q=state.quiz[state.qIndex];
+  $('q-tag').textContent=`Question ${state.qIndex+1} / ${total}`;
+  $('q-progress').style.width=`${(state.qIndex/total)*100}%`;
+  $('q-text').textContent=q.q;
+  $('q-feedback').className='feedback'; $('q-feedback').textContent='';
+  $('q-next-btn').style.display='none';
+
+  const box=$('q-choices'); box.innerHTML='';
+  q.choices.forEach(choice=>{
+    const btn=document.createElement('button'); btn.className='choice'; btn.textContent=choice;
+    btn.onclick=()=>selectAnswer(choice, btn);
+    box.appendChild(btn);
+  });
+
+  state.timeLeft=QUESTION_TIME; $('q-timer').textContent=`⏱ ${state.timeLeft}`;
+  clearInterval(state.timerHandle);
+  state.timerHandle=setInterval(()=>{
+    state.timeLeft--; $('q-timer').textContent=`⏱ ${Math.max(0,state.timeLeft)}`;
+    if(state.timeLeft<=0){ clearInterval(state.timerHandle); if(!state.answered) selectAnswer(null,null); }
+  },1000);
+}
+
+function selectAnswer(choice, btnEl){
+  if(state.answered) return;
+  state.answered=true; clearInterval(state.timerHandle);
+  const q=state.quiz[state.qIndex];
+  document.querySelectorAll('#q-choices .choice').forEach(b=>{
+    b.classList.add('disabled'); if(b.textContent===q.answer) b.classList.add('correct');
+  });
+  const isCorrect = choice===q.answer;
+  if(!isCorrect && btnEl) btnEl.classList.add('wrong');
+
+  const fb=$('q-feedback');
+  if(isCorrect){
+    state.score++;
+    const speedBonus=Math.max(0,state.timeLeft)*2;
+    state.points += 10+speedBonus;
+    fb.className='feedback show good';
+    fb.textContent=`✅ ${pick(MASCOT_LINES_CORRECT)} +${10+speedBonus} pts`;
+  } else {
+    fb.className='feedback show bad';
+    const reason = choice===null ? "Time's up! " : '';
+    fb.textContent=`❌ ${reason}${pick(MASCOT_LINES_WRONG)} The correct answer is "${q.answer}". ${q.explain}`;
+  }
+  $('q-next-btn').style.display='block';
+  $('q-next-btn').textContent = (state.qIndex+1>=state.quiz.length) ? 'See results ➜' : 'Next ➜';
+}
+
+function nextQuestion(){
+  state.qIndex++;
+  if(state.qIndex>=state.quiz.length) finishQuiz(); else renderQuestion();
+}
+
+async function finishQuiz(){
+  showScreen('screen-results');
+  $('result-score').textContent=`${state.score}/${state.quiz.length}`;
+  $('result-points').textContent=state.points;
+  const ratio=state.score/state.quiz.length;
+  $('result-mascot-line').textContent = ratio===1 ? "Perfect score! You're a maths champion! 🏆" :
+    ratio>=0.7 ? "Great work! Kancil is proud of you!" :
+    ratio>=0.4 ? "Good try! Practice makes perfect." : "Keep practicing — you'll get better every time!";
+
+  if(state.mode==='competition' && state.roomRef){
+    state.roomRef.child(`results/${state.nickname}`).set({ score:state.score, points:state.points, finishedAt: firebase.database.ServerValue.TIMESTAMP });
+    $('room-results-card').style.display='block';
+    listenRoomResults();
+  } else {
+    $('room-results-card').style.display='none';
+  }
+
+  if(validateGithubOrWarn()){ await submitScoreToGithub(); }
+  await renderResultLeaderboard();
+}
+
+function listenRoomResults(){
+  state.roomRef.child('results').on('value', snap=>{
+    const results = snap.val()||{};
+    const rows = Object.entries(results).sort((a,b)=>b[1].points-a[1].points);
+    const box=$('room-results-box');
+    if(!rows.length){ box.innerHTML='<p class="helptext">Waiting for players to finish…</p>'; return; }
+    box.innerHTML = rows.map(([name,r])=>
+      `<div class="live-row${name===state.nickname?' me':''}"><span>${escapeHtml(name)}</span><span>${r.score}/${state.quiz.length} · ${r.points} pts</span></div>`
+    ).join('');
+  });
+}
+
+async function submitScoreToGithub(){
+  const ts = new Date().toISOString().replace(/[:.]/g,'-');
+  const path = scorePath(state.grade, state.nickname, ts);
+  const entry = { nickname: state.nickname, score: state.score, total: state.quiz.length, points: state.points,
+    mode: state.mode, roomId: state.roomId, date: new Date().toISOString() };
+  const ok = await ghPutJson(path, entry, `score: ${state.nickname} (${state.grade})`, false); // new unique file, no sha/conflict
+  if(!ok) banner('⚠️ Could not save score to GitHub — check Admin connection.', 'err', 6000);
+  return ok;
+}
+
+/* ============================================================
+   LEADERBOARD — index file preferred; falls back to scanning recent score-files
+============================================================ */
+async function fetchLeaderboard(grade){
+  const {json: index} = await ghGetJson(indexPath(grade));
+  if(Array.isArray(index) === false && index && Array.isArray(index.top)){
+    return index.top;
+  }
+  // fallback: list recent score files and fetch them (capped)
+  const {json: listing} = await ghGetJson(`data/leaderboard/${grade}`);
+  if(!Array.isArray(listing) || !listing.length) return [];
+  const recent = listing.sort((a,b)=> b.name.localeCompare(a.name)).slice(0, LEADERBOARD_SCAN_LIMIT);
+  const files = await Promise.all(recent.map(f=>ghGetJson(f.path)));
+  return files.map(f=>f.json).filter(Boolean).sort((a,b)=>b.points-a.points).slice(0,10);
+}
+function leaderboardTableHtml(list){
+  if(!list.length) return '<p class="helptext">No scores yet — be the first!</p>';
+  const top=[...list].sort((a,b)=>b.points-a.points).slice(0,10);
+  const medals=['🥇','🥈','🥉'];
+  const rows=top.map((e,i)=>`<tr><td>${medals[i]||(i+1)}</td><td>${escapeHtml(e.nickname)}</td><td>${e.score}/${e.total}</td><td>${e.points} pts</td></tr>`).join('');
+  return `<table class="leader"><thead><tr><th></th><th>Player</th><th>Score</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+async function renderResultLeaderboard(){
+  const box=$('result-leaderboard-box'); box.innerHTML='<p class="helptext">Loading…</p>';
+  box.innerHTML = leaderboardTableHtml(await fetchLeaderboard(state.grade));
+}
+async function loadLeaderboard(){
+  const g=$('leader-grade-select').value; const box=$('leaderboard-box');
+  if(!loadGithubConfig().owner){ box.innerHTML='<p class="helptext">Connect GitHub in ⚙️ Admin to see leaderboards.</p>'; return; }
+  box.innerHTML='<p class="helptext">Loading…</p>';
+  box.innerHTML = leaderboardTableHtml(await fetchLeaderboard(g));
+}
+
+/* ============================================================
+   ADMIN — Live rooms view
+============================================================ */
+let adminLiveRef=null;
+function startAdminLiveView(){
+  const db=ensureFirebase();
+  if(!db){ $('admin-live-box').innerHTML='<p class="helptext">Connect Firebase first.</p>'; return; }
+  stopAdminLiveView();
+  adminLiveRef = db.ref('lobbies');
+  adminLiveRef.on('value', snap=>{
+    const all = snap.val()||{};
+    const box=$('admin-live-box'); box.innerHTML='';
+    GRADES.forEach(g=>{
+      const grade = all[g.key]||{};
+      const waitingCount = grade.waiting ? Object.keys(grade.waiting).length : 0;
+      const rooms = grade.rooms||{};
+      const activeRooms = Object.values(rooms).filter(r=> Object.keys(r.results||{}).length < LOBBY_SIZE).length;
+      const row=document.createElement('div'); row.className='grade-live-row';
+      row.innerHTML=`<span class="gname">${g.label}</span><span class="gcounts">${waitingCount} waiting · ${activeRooms} room(s) active</span>`;
+      box.appendChild(row);
+    });
+  });
+}
+function stopAdminLiveView(){ if(adminLiveRef){ adminLiveRef.off(); adminLiveRef=null; } }
+
+/* ============================================================
+   ADMIN — Tools: rebuild index, clear lobby
+============================================================ */
+async function rebuildIndex(){
+  const grade=$('tools-grade-select').value;
+  $('tools-rebuild-result').textContent='Scanning score files…';
+  const {json: listing} = await ghGetJson(`data/leaderboard/${grade}`);
+  if(!Array.isArray(listing)){ $('tools-rebuild-result').textContent='No score files found yet for this grade.'; return; }
+  const batchSize=15; let all=[];
+  for(let i=0;i<listing.length;i+=batchSize){
+    const batch = listing.slice(i,i+batchSize);
+    const results = await Promise.all(batch.map(f=>ghGetJson(f.path)));
+    all = all.concat(results.map(r=>r.json).filter(Boolean));
+    $('tools-rebuild-result').textContent = `Scanned ${Math.min(i+batchSize, listing.length)} / ${listing.length} files…`;
+  }
+  const top = all.sort((a,b)=>b.points-a.points).slice(0,50);
+  const ok = await ghPutJson(indexPath(grade), {top, rebuiltAt: new Date().toISOString(), scannedFiles: listing.length}, `rebuild index: ${grade}`, true);
+  $('tools-rebuild-result').textContent = ok ? `✅ Index rebuilt from ${listing.length} files.` : '⚠️ Failed to write index — check GitHub connection.';
+}
+
+async function clearLobby(){
+  const grade=$('danger-grade-select').value;
+  if(!confirm(`Clear the live waiting list for ${gradeInfo(grade).label}? Active rooms in progress are left alone.`)) return;
+  const db=ensureFirebase();
+  if(!db){ alert('Connect Firebase first.'); return; }
+  await db.ref(`lobbies/${grade}/waiting`).remove();
+  banner(`Cleared waiting list for ${gradeInfo(grade).label}.`, 'ok', 4000);
+}
+
+function backToHome(){
+  $('nickname-input').value='';
+  document.querySelectorAll('.grade-btn').forEach(b=>b.classList.remove('selected'));
+  if(state.roomRef){ state.roomRef.child('results').off(); }
+  state = {...state, grade:null, mode:null, quiz:[], qIndex:0, score:0, points:0, roomId:null, roomRef:null, myWaitingKey:null};
+  showScreen('screen-home');
+}
+
+// initial leaderboard load if already configured
+if(loadGithubConfig().owner){ loadLeaderboard(); }
+</script>
+</body>
+</html>
