@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Kancil Kira-Kira — Malaysian Maths Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EAF4F4; --bg2:#F6FBFA; --ink:#16302B;
+    --teal:#0B7A75; --teal-dark:#075853;
+    --marigold:#F4A300; --hibiscus:#E94F64; --purple:#6A4C93;
+    --blue:#1E88E5; --green:#43A047; --rust:#D84315;
+    --card:#FFFFFF; --line:rgba(22,48,43,0.10);
+    --shadow: 0 10px 30px rgba(11,122,117,0.14); --radius: 22px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(ellipse at top left, rgba(244,163,0,0.10), transparent 45%),
+      radial-gradient(ellipse at bottom right, rgba(233,79,100,0.10), transparent 45%), var(--bg);
+    color:var(--ink); font-family:'Nunito',sans-serif; min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'Baloo 2',sans-serif;}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 2px 18px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-title{font-family:'Baloo 2';font-weight:800;font-size:20px;color:var(--teal-dark);}
+  .brand-sub{font-size:11px;color:var(--ink);opacity:0.55;font-weight:700;letter-spacing:.03em;}
+  .topbtns{display:flex;gap:8px;}
+  .icon-btn{border:none;background:var(--card);width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);font-size:17px;}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:16px;border:1px solid var(--line);}
+  .screen{display:none;}
+  .screen.active{display:block;animation:fadeUp .35s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  .mascot-wrap{display:flex;justify-content:center;margin-bottom:6px;}
+  .mascot{width:86px;height:86px;font-size:56px;display:flex;align-items:center;justify-content:center;}
+  .speech{background:var(--bg2);border:2px dashed var(--teal);border-radius:16px;padding:12px 16px;text-align:center;margin-top:6px;}
+  .speech .en{font-weight:700;font-size:14.5px;color:var(--teal-dark);}
+  .speech .bm{font-weight:600;font-size:12.5px;color:var(--teal-dark);opacity:.7;font-style:italic;margin-top:3px;}
+
+  h2.section-title{font-size:22px;margin:0 0 2px;color:var(--teal-dark);}
+  .section-title .bm{display:block;font-size:12.5px;font-weight:700;opacity:.55;font-style:italic;margin-top:1px;}
+  p.lead{margin:0 0 6px;opacity:.75;font-size:14.5px;line-height:1.5;}
+  p.lead .bm{display:block;opacity:.85;font-style:italic;font-size:13px;margin-top:2px;}
+  p.lead.tight{margin-bottom:18px;}
+
+  label{display:block;font-weight:800;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--teal-dark);margin:14px 0 6px;}
+  label .bm{text-transform:none;opacity:.6;font-weight:700;}
+  input[type=text],input[type=password],select{
+    width:100%;padding:13px 14px;border-radius:14px;border:2px solid var(--line);
+    font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;color:var(--ink);
+    background:var(--bg2);outline:none;transition:border-color .15s;
+  }
+  input:focus,select:focus{border-color:var(--teal);}
+
+  .grade-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+  .grade-btn{border:2px solid var(--line);background:var(--bg2);border-radius:16px;padding:14px 10px;cursor:pointer;text-align:left;transition:transform .12s;}
+  .grade-btn:hover{transform:translateY(-2px);}
+  .grade-btn .g-num{font-family:'Baloo 2';font-weight:800;font-size:15px;}
+  .grade-btn .g-my{font-size:11.5px;opacity:.65;font-weight:700;}
+  .grade-btn.selected{box-shadow:0 0 0 3px var(--sel,var(--teal)) inset;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex-direction:column;background:var(--teal);color:#fff;border:none;border-radius:16px;padding:12px 20px;font-family:'Baloo 2';font-weight:700;font-size:15.5px;cursor:pointer;width:100%;box-shadow:0 8px 20px rgba(11,122,117,0.30);transition:transform .12s;}
+  .btn .bm{font-size:11px;font-weight:600;opacity:.85;font-style:italic;}
+  .btn:hover{transform:translateY(-1px);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+  .btn.secondary{background:var(--bg2);color:var(--teal-dark);box-shadow:none;border:2px solid var(--line);}
+  .btn.marigold{background:var(--marigold);box-shadow:0 8px 20px rgba(244,163,0,0.35);}
+  .btn.danger{background:#fff;color:var(--rust);border:2px solid var(--rust);box-shadow:none;}
+  .btn.small{padding:9px 14px;font-size:13px;width:auto;border-radius:12px;}
+  .row{display:flex;gap:10px;}
+  .row .btn{flex:1;}
+
+  .flower-meter{display:flex;justify-content:center;gap:10px;margin:22px 0 8px;flex-wrap:wrap;}
+  .flower{width:38px;height:38px;opacity:.25;transform:scale(.85);transition:all .3s;}
+  .flower.filled{opacity:1;transform:scale(1);}
+  .lobby-count{text-align:center;font-family:'Baloo 2';font-weight:800;font-size:16.5px;color:var(--teal-dark);margin-top:8px;}
+  .lobby-sub{text-align:center;font-size:12px;opacity:.6;font-weight:700;margin-top:2px;}
+  .lobby-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px;}
+  .chip{background:var(--bg2);border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:800;font-size:13px;}
+  .pulse{animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+  .qtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .qtag{font-size:12px;font-weight:800;color:var(--teal-dark);background:var(--bg2);padding:5px 12px;border-radius:999px;}
+  .qtimer{font-family:'Baloo 2';font-weight:800;font-size:15px;color:var(--rust);}
+  .progressbar{height:8px;background:var(--bg2);border-radius:99px;overflow:hidden;margin-bottom:20px;}
+  .progressbar > div{height:100%;background:var(--marigold);border-radius:99px;transition:width .3s;}
+  .qtext-en{font-family:'Baloo 2';font-size:19px;font-weight:700;line-height:1.4;}
+  .qtext-bm{font-size:13.5px;font-weight:600;font-style:italic;opacity:.6;margin:4px 0 18px;}
+  .choices{display:grid;gap:10px;}
+  .choice{border:2px solid var(--line);background:var(--bg2);border-radius:16px;padding:14px 16px;font-weight:800;font-size:15px;cursor:pointer;text-align:left;transition:all .15s;}
+  .choice:hover{border-color:var(--teal);}
+  .choice.correct{background:#E4F6E6;border-color:var(--green);color:#1c5c22;}
+  .choice.wrong{background:#FCEAEC;border-color:var(--hibiscus);color:#9c2233;animation:shake .3s;}
+  .choice.disabled{pointer-events:none;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .feedback{margin-top:16px;padding:14px 16px;border-radius:14px;font-size:14px;display:none;}
+  .feedback .en{font-weight:700;}
+  .feedback .bm{font-weight:600;font-style:italic;opacity:.8;font-size:12.5px;margin-top:4px;}
+  .feedback.show{display:block;animation:fadeUp .25s ease;}
+  .feedback.good{background:#E4F6E6;color:#1c5c22;}
+  .feedback.bad{background:#FCEAEC;color:#9c2233;}
+
+  .score-big{font-family:'Baloo 2';font-weight:800;font-size:54px;text-align:center;color:var(--teal-dark);margin:8px 0 2px;}
+  .score-label{text-align:center;opacity:.6;font-weight:700;margin-bottom:20px;}
+  table.leader{width:100%;border-collapse:collapse;margin-top:10px;}
+  table.leader th{text-align:left;font-size:10.5px;text-transform:uppercase;opacity:.55;padding:6px 8px;}
+  table.leader td{padding:10px 8px;border-top:1px solid var(--line);font-weight:700;font-size:14px;}
+  table.leader tr:first-child td{font-weight:800;}
+  .live-row{display:flex;justify-content:space-between;padding:8px 10px;border-radius:10px;background:var(--bg2);margin-bottom:6px;font-weight:700;font-size:13.5px;}
+  .live-row.me{outline:2px solid var(--teal);}
+
+  .footer-note{text-align:center;font-size:12px;opacity:.5;margin-top:24px;font-weight:700;}
+  .iq-card{border:2px solid var(--purple);background:linear-gradient(180deg, rgba(106,76,147,0.06), #fff 60px);}
+  .iq-score-badge{background:linear-gradient(135deg, var(--purple), #8a68b8);color:#fff;border-radius:18px;padding:16px;text-align:center;margin:12px 0;}
+  .iq-score-badge .num{font-family:'Baloo 2';font-weight:800;font-size:40px;}
+  .iq-score-badge .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;opacity:.85;}
+  .iq-score-badge .note{font-size:11px;opacity:.85;margin-top:6px;font-style:italic;}
+  .token-steps{margin:0 0 16px;padding-left:20px;}
+  .token-steps li{margin-bottom:12px;font-size:13px;line-height:1.5;}
+  .token-steps li .en{font-weight:700;}
+  .token-steps li .bm{opacity:.6;font-style:italic;font-size:12px;margin-top:2px;}
+  .status-banner{font-size:12.5px;font-weight:800;padding:9px 12px;border-radius:12px;margin-bottom:14px;background:#FFF4E0;color:#8a5a00;display:none;}
+  .status-banner.show{display:block;}
+  .status-banner.err{background:#FCEAEC;color:#9c2233;}
+  .status-banner.ok{background:#E4F6E6;color:#1c5c22;}
+  .helptext{font-size:12px;opacity:.55;margin-top:4px;line-height:1.5;}
+  a{color:var(--teal-dark);}
+
+  .admin-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+  .admin-tab-btn{border:2px solid var(--line);background:var(--bg2);border-radius:12px;padding:9px 14px;font-family:'Baloo 2';font-weight:700;font-size:13px;cursor:pointer;color:var(--ink);}
+  .admin-tab-btn.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+  .admin-panel{display:none;}
+  .admin-panel.active{display:block;}
+  .connection-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ccc;margin-right:6px;}
+  .connection-dot.ok{background:var(--green);}
+  .connection-dot.bad{background:var(--rust);}
+  .grade-live-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:12px;background:var(--bg2);margin-bottom:8px;}
+  .grade-live-row .gname{font-weight:800;font-size:14px;}
+  .grade-live-row .gcounts{font-size:12px;font-weight:700;opacity:.7;}
+  code{background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:11.5px;}
+
+  .syllabus-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+  .syl-tab-btn{border:2px solid var(--line);background:var(--bg2);border-radius:12px;padding:8px 13px;font-family:'Baloo 2';font-weight:700;font-size:12.5px;cursor:pointer;color:var(--ink);}
+  .syl-tab-btn.active{color:#fff;}
+  .syl-panel{display:none;}
+  .syl-panel.active{display:block;animation:fadeUp .25s ease;}
+  .syl-progress{font-size:12px;font-weight:800;opacity:.55;margin-bottom:10px;}
+  .syl-item{border:2px solid var(--line);border-radius:16px;margin-bottom:10px;overflow:hidden;background:var(--bg2);}
+  .syl-head{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;background:none;border:none;width:100%;text-align:left;font-family:'Nunito',sans-serif;}
+  .syl-icon{font-size:22px;flex-shrink:0;width:30px;text-align:center;}
+  .syl-num{font-family:'Baloo 2';font-weight:800;color:var(--teal);flex-shrink:0;width:18px;font-size:13px;}
+  .syl-head-text{flex:1;}
+  .syl-head-text .en{font-weight:800;font-size:14px;}
+  .syl-head-text .bm{font-size:12px;opacity:.6;font-style:italic;margin-top:2px;}
+  .syl-chevron{flex-shrink:0;font-size:12px;opacity:.5;transition:transform .25s;}
+  .syl-item.open .syl-chevron{transform:rotate(180deg);}
+  .syl-body{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+  .syl-item.open .syl-body{max-height:520px;}
+  .syl-body-inner{padding:0 16px 16px 58px;}
+  .syl-note{font-size:13.5px;line-height:1.5;margin-bottom:10px;}
+  .syl-note .en{font-weight:700;}
+  .syl-note .bm{opacity:.65;font-style:italic;margin-top:2px;}
+  .syl-example{background:#fff;border:1px dashed var(--teal);border-radius:12px;padding:10px 12px;font-size:12.5px;margin-bottom:10px;}
+  .syl-example .tag{font-weight:800;color:var(--teal-dark);font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px;}
+  .syl-example .en{font-weight:700;}
+  .syl-example .bm{opacity:.65;font-style:italic;margin-top:2px;}
+  .syl-check{background:var(--bg); border-radius:12px;padding:10px 12px;}
+  .syl-check-q{font-size:12.5px;margin-bottom:8px;}
+  .syl-check-q .en{font-weight:800;}
+  .syl-check-q .bm{opacity:.6;font-style:italic;margin-top:2px;}
+  .syl-check-btn{background:var(--teal);color:#fff;border:none;border-radius:10px;padding:7px 12px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;}
+  .syl-check-answer{display:none;margin-left:8px;font-weight:800;color:var(--teal-dark);font-size:13px;background:#E4F6E6;padding:5px 10px;border-radius:8px;}
+  .syl-controls{display:flex;gap:8px;margin-bottom:12px;}
+  .syl-controls .btn{width:auto;flex:1;}
+
+  .pw-box{max-width:340px;margin:60px auto 0;text-align:center;}
+  .pw-error{color:var(--rust);font-weight:800;font-size:13px;margin-top:8px;display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#F4A300"/></svg>
+      <div>
+        <div class="brand-title">Kancil Kira-Kira</div>
+        <div class="brand-sub">KSSR Maths Quiz ・ Kuiz Matematik KSSR</div>
+      </div>
+    </div>
+    <div class="topbtns">
+      <button class="icon-btn" onclick="showScreen('screen-syllabus')" title="Syllabus / Sukatan">📖</button>
+      <button class="icon-btn" onclick="openAdminGate()" title="Admin">⚙️</button>
+    </div>
+  </div>
+
+  <div id="status-banner" class="status-banner"></div>
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="card">
+      <div class="mascot-wrap"><div class="mascot">🦌</div></div>
+      <div class="speech">
+        <div class="en">Hi! I'm Kancil. Pick your name and grade to start playing maths games!</div>
+        <div class="bm">Hai! Saya Kancil. Pilih nama dan tahun anda untuk mula bermain permainan matematik!</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="section-title">Join the game<span class="bm">Sertai Permainan</span></h2>
+      <p class="lead tight">Choose a nickname (no password needed) and your grade, based on the Malaysian KSSR syllabus.<span class="bm">Pilih nama pendaftaran (tiada kata laluan diperlukan) dan tahun anda, berdasarkan sukatan KSSR Malaysia.</span></p>
+      <label>Nickname <span class="bm">／ Nama Pendaftaran</span></label>
+      <input type="text" id="nickname-input" maxlength="16" placeholder="e.g. AliBoy, SiComel99">
+      <label>Grade / Tahun</label>
+      <div class="grade-grid" id="grade-grid"></div>
+      <div style="margin-top:20px" class="row">
+        <button class="btn secondary" onclick="startPractice()">🧪 Practice (solo)<span class="bm">Latihan (solo)</span></button>
+        <button class="btn marigold" onclick="joinCompetition()">🏆 Join Competition<span class="bm">Sertai Pertandingan</span></button>
+      </div>
+      <p class="helptext">Practice starts instantly, just for you. Competition puts you in a live lobby — as soon as 5 players from your grade are waiting, a room forms automatically and everyone gets the same questions at the same time.<br><i>Latihan bermula serta-merta, khas untuk anda. Pertandingan meletakkan anda dalam bilik menunggu langsung — sebaik sahaja 5 pemain dari tahun anda menunggu, satu bilik terbentuk secara automatik dan semua orang mendapat soalan yang sama pada masa yang sama.</i></p>
+    </div>
+    <div class="card iq-card">
+      <h2 class="section-title">🧠 IQ Challenge<span class="bm">Cabaran IQ</span></h2>
+      <p class="lead tight">20 logic, pattern, and reasoning questions — a fun brain workout, open to any grade.<span class="bm">20 soalan logik, corak, dan penaakulan — senaman minda yang menyeronokkan, terbuka untuk semua tahun.</span></p>
+      <p class="helptext" style="margin-bottom:14px;">⚠️ This is a fun challenge, not a clinical or scientifically validated IQ test.<br><i>Ini ialah cabaran untuk keseronokan, bukan ujian IQ klinikal atau disahkan secara saintifik.</i></p>
+      <button class="btn" style="background:var(--purple);box-shadow:0 8px 20px rgba(106,76,147,0.30);" onclick="startIQChallenge()">🧠 Start IQ Challenge<span class="bm">Mula Cabaran IQ</span></button>
+      <div style="margin-top:16px;">
+        <div class="helptext" style="margin-bottom:6px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;">🏅 IQ Leaderboard ／ Papan Pendahulu IQ</div>
+        <div id="iq-leaderboard-box"><p class="helptext">Connect GitHub to see the IQ leaderboard. ／ Sambung GitHub untuk lihat papan pendahulu IQ.</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="section-title" style="font-size:16px;">🏅 Leaderboard<span class="bm">Papan Pendahulu</span></h2>
+      <select id="leader-grade-select" onchange="loadLeaderboard()"></select>
+      <div id="leaderboard-box"><p class="helptext">Select a grade to view top scores. ／ Pilih tahun untuk melihat markah tertinggi.</p></div>
+    </div>
+  </div>
+
+  <!-- SYLLABUS -->
+  <div class="screen" id="screen-syllabus">
+    <div class="card">
+      <h2 class="section-title">📖 Full KSSR Syllabus<span class="bm">Sukatan Pelajaran KSSR Penuh</span></h2>
+      <p class="lead tight">A general overview of Malaysian Mathematics topics from Preschool to Standard 6, matched to what each grade's quiz covers.<span class="bm">Gambaran umum topik Matematik Malaysia dari Prasekolah hingga Tahun 6, sepadan dengan kandungan kuiz setiap tahun.</span></p>
+      <div class="syllabus-tabs" id="syllabus-tabs"></div>
+      <div id="syllabus-panels"></div>
+    </div>
+    <div class="row">
+      <button class="btn secondary" onclick="showScreen('screen-home')">Back to home<span class="bm">Kembali</span></button>
+    </div>
+  </div>
+
+  <!-- LOBBY -->
+  <div class="screen" id="screen-lobby">
+    <div class="card" style="text-align:center;">
+      <h2 class="section-title">Waiting for players…<span class="bm">Menunggu pemain…</span></h2>
+      <p class="lead" id="lobby-grade-label">Grade: —</p>
+      <div class="flower-meter" id="flower-meter"></div>
+      <div class="lobby-count" id="lobby-count">0 / 5</div>
+      <div class="lobby-sub" id="lobby-total">—</div>
+      <div class="lobby-list" id="lobby-list"></div>
+      <div style="margin-top:22px">
+        <button class="btn secondary" onclick="leaveLobby()">Leave lobby<span class="bm">Keluar Bilik</span></button>
+      </div>
+      <p class="helptext">Checking for new players every few seconds…<br><i>Menyemak pemain baharu setiap beberapa saat…</i></p>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div class="screen" id="screen-countdown">
+    <div class="card" style="text-align:center;">
+      <div class="mascot-wrap"><div class="mascot pulse">🦌</div></div>
+      <h2 class="section-title">5 players ready!<span class="bm">5 pemain sedia!</span></h2>
+      <div class="score-big" id="countdown-num">5</div>
+      <p class="lead">Get ready to answer fast — quicker correct answers score more points!<span class="bm">Bersedia untuk jawab dengan pantas — jawapan betul yang lebih pantas dapat lebih mata!</span></p>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="card">
+      <div class="qtop">
+        <div class="qtag" id="q-tag">Question 1/10 ・ Soalan 1/10</div>
+        <div class="qtimer" id="q-timer">⏱ 15</div>
+      </div>
+      <div class="progressbar"><div id="q-progress" style="width:0%"></div></div>
+      <div class="qtext-en" id="q-text-en">Loading…</div>
+      <div class="qtext-bm" id="q-text-bm"></div>
+      <div class="choices" id="q-choices"></div>
+      <div class="feedback" id="q-feedback"></div>
+      <button class="btn marigold" id="q-next-btn" style="margin-top:16px;display:none;" onclick="nextQuestion()">Next ➜<span class="bm">Seterusnya</span></button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="screen-results">
+    <div class="card" style="text-align:center;">
+      <div class="mascot-wrap"><div class="mascot">🦌</div></div>
+      <div class="speech" id="result-mascot-speech"><div class="en">Great job!</div><div class="bm">Syabas!</div></div>
+      <div class="score-big" id="result-score">0/10</div>
+      <div class="score-label">Points / Mata: <span id="result-points">0</span></div>
+      <div id="iq-score-badge" class="iq-score-badge" style="display:none;">
+        <div class="lbl">Estimated IQ score ／ Anggaran Skor IQ</div>
+        <div class="num" id="iq-score-num">100</div>
+        <div class="note">For fun only, not a clinical assessment. ／ Untuk keseronokan sahaja, bukan penilaian klinikal.</div>
+      </div>
+      <button class="btn" onclick="backToHome()">Back to home<span class="bm">Kembali ke Laman Utama</span></button>
+    </div>
+    <div class="card" id="room-results-card" style="display:none;">
+      <h2 class="section-title" style="font-size:16px;">⚡ This room<span class="bm">Bilik Ini</span></h2>
+      <p class="helptext">Your 5-player room's results. ／ Keputusan bilik 5-pemain anda.</p>
+      <button class="btn secondary small" style="margin:8px 0 10px;" onclick="refreshRoomResults()">Refresh ／ Segarkan</button>
+      <div id="room-results-box"></div>
+    </div>
+    <div class="card">
+      <h2 class="section-title" style="font-size:16px;" id="result-leaderboard-title">🏅 All-time leaderboard<span class="bm">Papan Pendahulu Sepanjang Masa</span></h2>
+      <div id="result-leaderboard-box"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN PASSWORD GATE -->
+  <div class="screen" id="screen-admin-gate">
+    <div class="card pw-box">
+      <div class="mascot-wrap"><div class="mascot">🔒</div></div>
+      <h2 class="section-title" style="text-align:center;">Admin access<span class="bm">Akses Pentadbir</span></h2>
+      <p class="lead" style="text-align:center;">Enter the admin password to continue.<span class="bm">Masukkan kata laluan pentadbir untuk teruskan.</span></p>
+      <input type="password" id="admin-pw-input" placeholder="Password ／ Kata Laluan" onkeydown="if(event.key==='Enter')checkAdminPassword()">
+      <div class="pw-error" id="admin-pw-error">❌ Wrong password. ／ Kata laluan salah.</div>
+      <div class="row" style="margin-top:16px;">
+        <button class="btn secondary" onclick="showScreen('screen-home')">Cancel ／ Batal</button>
+        <button class="btn" onclick="checkAdminPassword()">Unlock ／ Buka</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="screen" id="screen-admin">
+    <div class="card">
+      <h2 class="section-title">⚙️ Admin<span class="bm">Pentadbir</span></h2>
+      <p class="lead">Connect your GitHub repo, watch live lobby activity across all grades, and manage the leaderboard archive.<span class="bm">Sambungkan repo GitHub anda, pantau aktiviti bilik menunggu langsung bagi semua tahun, dan urus arkib papan pendahulu.</span></p>
+      <div class="admin-tabs">
+        <button class="admin-tab-btn active" data-tab="connections" onclick="switchAdminTab('connections')">Connection ／ Sambungan</button>
+        <button class="admin-tab-btn" data-tab="live" onclick="switchAdminTab('live')">Live rooms ／ Bilik Langsung</button>
+        <button class="admin-tab-btn" data-tab="tools" onclick="switchAdminTab('tools')">Tools ／ Alat</button>
+      </div>
+
+      <div class="admin-panel active" id="admin-connections">
+        <h3 style="margin:0 0 4px;font-size:15px;"><span class="connection-dot" id="dot-github"></span>GitHub repository</h3>
+        <p class="helptext">
+          Everything — the live lobby, matchmaking, and the leaderboard — is stored as small JSON files in one GitHub repo via the Contents API. Create a repo (private is fine) and a
+          <a href="https://github.com/settings/tokens?type=beta" target="_blank">fine-grained personal access token</a> with <b>Contents: Read & write</b> on that repo.
+          <br><i>Semuanya — bilik menunggu langsung, padanan pemain, dan papan pendahulu — disimpan sebagai fail JSON kecil dalam satu repo GitHub. Cipta repo (peribadi tidak mengapa) dan token akses peribadi dengan kebenaran Contents: Read & write.</i>
+        </p>
+        <p class="helptext">
+          <b>How this scales to hundreds of players:</b> each player writes their own uniquely-named file to join a lobby — nothing to conflict over. Every client sorts the lobby folder and groups every 5 players by position, so rooms form without any central lock. Polling uses conditional requests (ETags), so unchanged checks don't count against GitHub's rate limit.
+          <br><i>Setiap pemain menulis fail sendiri untuk menyertai bilik — tiada percanggahan. Setiap peranti mengisih senarai dan mengumpulkan setiap 5 pemain mengikut kedudukan, jadi bilik terbentuk tanpa sebarang kawalan pusat.</i>
+        </p>
+
+        <button type="button" class="btn secondary small" style="margin-bottom:12px;" onclick="toggleTokenGuide()">📋 How to get a GitHub token ／ Cara Dapatkan Token GitHub</button>
+        <div id="token-guide" style="display:none;background:var(--bg2);border-radius:14px;padding:16px 16px 4px;margin-bottom:16px;">
+          <ol class="token-steps">
+            <li><div class="en"><b>Create a repo first</b> — go to github.com, click + → New repository. Name it e.g. <code>kancil-kira-data</code>. Private or public both work.</div>
+                <div class="bm">Cipta repo dahulu — pergi ke github.com, klik + → New repository. Namakan cth. <code>kancil-kira-data</code>. Peribadi atau awam kedua-duanya boleh.</div></li>
+            <li><div class="en"><b>Open the token page</b> — go to <a href="https://github.com/settings/tokens?type=beta" target="_blank">github.com/settings/tokens?type=beta</a> to create a fine-grained token.</div>
+                <div class="bm">Buka halaman token — pergi ke <a href="https://github.com/settings/tokens?type=beta" target="_blank">github.com/settings/tokens?type=beta</a> untuk mencipta token fine-grained.</div></li>
+            <li><div class="en"><b>Name it & set an expiry</b> — e.g. "Kancil Kira-Kira quiz app". Choose "No expiration" or a date far ahead so it doesn't expire mid-term.</div>
+                <div class="bm">Namakan dan tetapkan tarikh luput — cth. "Kancil Kira-Kira quiz app". Pilih "No expiration" atau tarikh jauh di hadapan.</div></li>
+            <li><div class="en"><b>Limit it to your repo</b> — under "Repository access", choose "Only select repositories" and pick the one you made.</div>
+                <div class="bm">Hadkan kepada repo anda — di bawah "Repository access", pilih "Only select repositories" dan pilih repo yang dicipta.</div></li>
+            <li><div class="en"><b>Grant Contents permission</b> — under "Permissions" → "Repository permissions", set <b>Contents</b> to <b>Read and write</b>. Leave everything else as "No access".</div>
+                <div class="bm">Berikan kebenaran Contents — di bawah "Permissions" → "Repository permissions", tetapkan Contents kepada Read and write. Biarkan yang lain sebagai No access.</div></li>
+            <li><div class="en"><b>Generate & copy it</b> — click "Generate token". Copy it immediately (starts with <code>github_pat_</code>) — it's shown only once.</div>
+                <div class="bm">Jana dan salin — klik "Generate token". Salin serta-merta (bermula dengan <code>github_pat_</code>) — ia hanya ditunjukkan sekali.</div></li>
+            <li><div class="en"><b>Paste it below & test</b> — fill in your username, repo name, and branch, paste the token in, then click "Test connection".</div>
+                <div class="bm">Tampal di bawah dan uji — isikan nama pengguna, nama repo, dan cawangan, tampal token, kemudian klik "Test connection".</div></li>
+          </ol>
+        </div>
+
+        <label>GitHub username / org</label>
+        <input type="text" id="cfg-owner" placeholder="e.g. hafizwan">
+        <label>Repository name ／ Nama Repositori</label>
+        <input type="text" id="cfg-repo" placeholder="e.g. kancil-kira-data">
+        <label>Branch</label>
+        <input type="text" id="cfg-branch" placeholder="main" value="main">
+        <label>Personal access token ／ Token Akses Peribadi</label>
+        <input type="password" id="cfg-token" placeholder="github_pat_...">
+        <div class="row" style="margin-top:14px;">
+          <button class="btn secondary" onclick="testGithub()">Test connection</button>
+          <button class="btn" onclick="saveGithubConfig()">Save ／ Simpan</button>
+        </div>
+        <div id="cfg-test-result" class="helptext"></div>
+      </div>
+
+      <div class="admin-panel" id="admin-live">
+        <p class="lead">Live snapshot of players waiting per grade, refreshed every few seconds.<span class="bm">Paparan langsung pemain yang menunggu mengikut tahun, disegarkan setiap beberapa saat.</span></p>
+        <div id="admin-live-box"><p class="helptext">Connect GitHub first. ／ Sambung GitHub dahulu.</p></div>
+      </div>
+
+      <div class="admin-panel" id="admin-tools">
+        <h3 style="margin:0 0 8px;font-size:15px;">Rebuild leaderboard index ／ Bina Semula Indeks</h3>
+        <p class="helptext">Scores are stored one file per submission, so loading the leaderboard means listing many files. Rebuilding compiles a fast top-50 index per grade.<br><i>Markah disimpan sebagai satu fail setiap penyerahan, jadi memuatkan papan pendahulu bermakna menyenaraikan banyak fail. Membina semula menghasilkan indeks 50 teratas yang pantas.</i></p>
+        <select id="tools-grade-select" style="margin-top:8px;"></select>
+        <button class="btn marigold small" style="margin-top:10px;" onclick="rebuildIndex()">Rebuild index ／ Bina Semula</button>
+        <div id="tools-rebuild-result" class="helptext"></div>
+
+        <hr style="border:none;border-top:1px solid var(--line);margin:22px 0;">
+
+        <h3 style="margin:0 0 8px;font-size:15px;color:var(--rust);">Danger zone ／ Zon Bahaya</h3>
+        <p class="helptext">Deletes every file in a grade's waiting folder. Saved scores are not affected.<br><i>Memadam semua fail dalam folder menunggu bagi satu tahun. Markah yang disimpan tidak terjejas.</i></p>
+        <select id="danger-grade-select" style="margin-top:8px;"></select>
+        <button class="btn danger small" style="margin-top:10px;" onclick="clearLobby()">Clear waiting list ／ Kosongkan Senarai</button>
+        <div id="danger-clear-result" class="helptext"></div>
+      </div>
+
+      <div class="row" style="margin-top:22px;">
+        <button class="btn secondary" onclick="showScreen('screen-home')">Back to game ／ Kembali</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Built for Malaysian preschool–Tahun 6 · KSSR-aligned practice questions</div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG & CONSTANTS
+============================================================ */
+const ADMIN_PASSWORD = 'admin123';
+
+const GRADES = [
+  {key:'preschool', label:'Preschool', my:'Prasekolah', color:'var(--marigold)'},
+  {key:'std1', label:'Standard 1', my:'Tahun 1', color:'var(--hibiscus)'},
+  {key:'std2', label:'Standard 2', my:'Tahun 2', color:'var(--teal)'},
+  {key:'std3', label:'Standard 3', my:'Tahun 3', color:'var(--purple)'},
+  {key:'std4', label:'Standard 4', my:'Tahun 4', color:'var(--blue)'},
+  {key:'std5', label:'Standard 5', my:'Tahun 5', color:'var(--green)'},
+  {key:'std6', label:'Standard 6', my:'Tahun 6', color:'var(--rust)'},
+];
+
+const QUESTION_TIME = 15;
+const LOBBY_SIZE = 5;
+const LOBBY_POLL_MS = 4000;
+const COUNTDOWN_MS = 8000;
+const QUIZ_LENGTH = 10;
+const LEADERBOARD_SCAN_LIMIT = 30;
+
+/* ============================================================
+   SYLLABUS (bilingual overview, matched to grade topics)
+============================================================ */
+const SYLLABUS = {
+  preschool: [
+    {en:"Numbers 1–10", bm:"Nombor 1–10", icon:"🔢",
+     explain_en:"Numbers help us count how many things there are. We start from 1 and count up to 10, one at a time.",
+     explain_bm:"Nombor membantu kita mengira berapa banyak benda yang ada. Kita mula dari 1 dan kira sehingga 10, satu demi satu.",
+     example_en:"Count these apples: 🍎🍎🍎🍎 → 1, 2, 3, 4. There are 4 apples.",
+     example_bm:"Kira epal ini: 🍎🍎🍎🍎 → 1, 2, 3, 4. Ada 4 biji epal.",
+     check_q_en:"How many balloons? 🎈🎈🎈", check_q_bm:"Berapakah bilangan belon? 🎈🎈🎈", check_a:"3"},
+    {en:"Comparing quantities", bm:"Membanding kuantiti", icon:"⚖️",
+     explain_en:"'More' means a bigger amount, 'less' means a smaller amount, and 'equal' means the same amount.",
+     explain_bm:"'Lebih' bermaksud jumlah lebih besar, 'kurang' bermaksud jumlah lebih kecil, dan 'sama' bermaksud jumlah serupa.",
+     example_en:"🍊🍊🍊 has more than 🍊🍊 — 3 is more than 2.",
+     example_bm:"🍊🍊🍊 lebih banyak daripada 🍊🍊 — 3 lebih banyak daripada 2.",
+     check_q_en:"Which has more: 🐱🐱🐱🐱 or 🐱🐱?", check_q_bm:"Yang manakah lebih banyak: 🐱🐱🐱🐱 atau 🐱🐱?", check_a:"🐱🐱🐱🐱 (4)"},
+    {en:"Basic 2D shapes & patterns", bm:"Bentuk 2D asas dan corak", icon:"🔺",
+     explain_en:"Shapes have names based on their sides and corners. A pattern repeats in a set order, like colours or shapes.",
+     explain_bm:"Bentuk mempunyai nama berdasarkan sisi dan bucunya. Corak berulang mengikut susunan tertentu, seperti warna atau bentuk.",
+     example_en:"🔴🔵🔴🔵🔴 — the pattern is red, blue, red, blue... what comes next? Blue!",
+     example_bm:"🔴🔵🔴🔵🔴 — corak ini merah, biru, merah, biru... apakah seterusnya? Biru!",
+     check_q_en:"A shape with 3 sides is called a...?", check_q_bm:"Bentuk yang mempunyai 3 sisi dipanggil...?", check_a:"Triangle / Segi Tiga"},
+    {en:"Simple addition & subtraction (within 10)", bm:"Tambah dan tolak ringkas (dalam 10)", icon:"➕",
+     explain_en:"Addition means putting groups together to find the total. Subtraction means taking some away to find what's left.",
+     explain_bm:"Tambah bermaksud menggabungkan kumpulan untuk mencari jumlah. Tolak bermaksud mengambil sebahagian untuk mencari baki.",
+     example_en:"3 + 2 = 5 (put 3 and 2 together). 5 − 2 = 3 (take 2 away from 5).",
+     example_bm:"3 + 2 = 5 (gabungkan 3 dan 2). 5 − 2 = 3 (ambil 2 daripada 5).",
+     check_q_en:"4 + 1 = ?", check_q_bm:"4 + 1 = ?", check_a:"5"},
+    {en:"Size, position & time", bm:"Saiz, kedudukan dan masa", icon:"🧭",
+     explain_en:"We describe things as big or small, and where they are — like on top, under, in front, or behind. We also learn about day and night.",
+     explain_bm:"Kita menerangkan benda sebagai besar atau kecil, dan kedudukannya — seperti atas, bawah, depan, atau belakang. Kita juga belajar siang dan malam.",
+     example_en:"The cat is ON TOP of the box. The sun is out in the DAY.",
+     example_bm:"Kucing itu di ATAS kotak. Matahari terbit pada waktu SIANG.",
+     check_q_en:"Do we sleep in the day or at night?", check_q_bm:"Adakah kita tidur pada waktu siang atau malam?", check_a:"Night / Malam"},
+    {en:"Introduction to money", bm:"Pengenalan wang", icon:"🪙",
+     explain_en:"Coins are round metal money. In Malaysia, we use sen coins, like 10 sen, 20 sen, and 50 sen.",
+     explain_bm:"Syiling ialah wang logam bulat. Di Malaysia, kita guna syiling sen, seperti 10 sen, 20 sen, dan 50 sen.",
+     example_en:"Two 10 sen coins together make 20 sen.",
+     example_bm:"Dua syiling 10 sen digabung menjadikan 20 sen.",
+     check_q_en:"Which is worth more: 10 sen or 50 sen?", check_q_bm:"Yang manakah bernilai lebih: 10 sen atau 50 sen?", check_a:"50 sen"},
+  ],
+  std1: [
+    {en:"Numbers to 100", bm:"Nombor hingga 100", icon:"🔢",
+     explain_en:"Numbers up to 100 are made of tens and ones. For example, 34 means 3 tens and 4 ones.",
+     explain_bm:"Nombor hingga 100 dibina daripada puluh dan sa. Contohnya, 34 bermaksud 3 puluh dan 4 sa.",
+     example_en:"56 = 5 tens (50) + 6 ones (6).", example_bm:"56 = 5 puluh (50) + 6 sa (6).",
+     check_q_en:"How many tens are in 72?", check_q_bm:"Berapakah bilangan puluh dalam 72?", check_a:"7"},
+    {en:"Addition & subtraction within 100", bm:"Tambah dan tolak dalam 100", icon:"➕",
+     explain_en:"Add tens with tens and ones with ones. For subtraction, take away from the ones first, then the tens.",
+     explain_bm:"Tambah puluh dengan puluh dan sa dengan sa. Untuk tolak, ambil daripada sa dahulu, kemudian puluh.",
+     example_en:"34 + 21 = 55 (3 tens+2 tens=5 tens, 4 ones+1 one=5 ones).", example_bm:"34 + 21 = 55 (3 puluh+2 puluh=5 puluh, 4 sa+1 sa=5 sa).",
+     check_q_en:"45 − 20 = ?", check_q_bm:"45 − 20 = ?", check_a:"25"},
+    {en:"Basic 2D & 3D shapes", bm:"Bentuk asas 2D dan 3D", icon:"🧊",
+     explain_en:"2D shapes are flat, like squares and circles. 3D shapes are solid, like cubes and balls, and take up space.",
+     explain_bm:"Bentuk 2D adalah rata, seperti segi empat sama dan bulatan. Bentuk 3D adalah pepejal, seperti kubus dan bola, dan menempati ruang.",
+     example_en:"A ball is a sphere (3D). A drawing of a circle is 2D.", example_bm:"Bola ialah sfera (3D). Lukisan bulatan ialah 2D.",
+     check_q_en:"Is a cube 2D or 3D?", check_q_bm:"Adakah kubus 2D atau 3D?", check_a:"3D"},
+    {en:"Time: o'clock & half past", bm:"Masa: pukul dan setengah", icon:"⏰",
+     explain_en:"When the minute hand points to 12, it's an exact hour (o'clock). When it points to 6, it's half past.",
+     explain_bm:"Apabila jarum minit menunjuk ke angka 12, ia jam genap (pukul). Apabila menunjuk ke angka 6, ia setengah jam.",
+     example_en:"Hour hand on 4, minute hand on 12 → 4 o'clock.", example_bm:"Jarum jam pada 4, jarum minit pada 12 → pukul 4.",
+     check_q_en:"Minute hand on 6, hour hand between 7 and 8 — what time?", check_q_bm:"Jarum minit pada 6, jarum jam antara 7 dan 8 — pukul berapa?", check_a:"Half past 7 / Pukul 7 setengah"},
+    {en:"Money: sen & Ringgit", bm:"Wang: sen dan Ringgit", icon:"💵",
+     explain_en:"100 sen makes RM1. We write Ringgit with 'RM' in front, like RM5.",
+     explain_bm:"100 sen menjadikan RM1. Kita tulis Ringgit dengan 'RM' di depan, seperti RM5.",
+     example_en:"50 sen + 50 sen = RM1.", example_bm:"50 sen + 50 sen = RM1.",
+     check_q_en:"How many 20 sen coins make RM1?", check_q_bm:"Berapa keping syiling 20 sen menjadikan RM1?", check_a:"5"},
+    {en:"Basic measurement", bm:"Ukuran asas", icon:"📏",
+     explain_en:"We compare things using words like longer/shorter, heavier/lighter, and more/less, without needing exact numbers yet.",
+     explain_bm:"Kita membanding benda menggunakan perkataan seperti lebih panjang/pendek, lebih berat/ringan, dan lebih/kurang.",
+     example_en:"A pencil is shorter than a ruler.", example_bm:"Pensel lebih pendek daripada pembaris.",
+     check_q_en:"Which is heavier: a feather or a rock?", check_q_bm:"Yang manakah lebih berat: bulu atau batu?", check_a:"A rock / Batu"},
+  ],
+  std2: [
+    {en:"Numbers to 1,000", bm:"Nombor hingga 1,000", icon:"🔢",
+     explain_en:"Numbers to 1,000 have hundreds, tens, and ones. For example, 452 means 4 hundreds, 5 tens, 2 ones.",
+     explain_bm:"Nombor hingga 1,000 mempunyai ratus, puluh, dan sa. Contohnya, 452 bermaksud 4 ratus, 5 puluh, 2 sa.",
+     example_en:"Round 468 to the nearest hundred: closer to 500 than 400, so 500.", example_bm:"Bundarkan 468 kepada ratus terdekat: lebih dekat kepada 500, jadi 500.",
+     check_q_en:"How many hundreds are in 730?", check_q_bm:"Berapakah bilangan ratus dalam 730?", check_a:"7"},
+    {en:"Addition & subtraction within 1,000", bm:"Tambah dan tolak dalam 1,000", icon:"➕",
+     explain_en:"Line up hundreds, tens, and ones, then add or subtract each column, just like with smaller numbers.",
+     explain_bm:"Susun ratus, puluh, dan sa, kemudian tambah atau tolak setiap lajur, sama seperti nombor kecil.",
+     example_en:"245 + 130 = 375.", example_bm:"245 + 130 = 375.",
+     check_q_en:"500 − 150 = ?", check_q_bm:"500 − 150 = ?", check_a:"350"},
+    {en:"Multiplication tables 2,3,4,5,10", bm:"Sifir 2,3,4,5,10", icon:"✖️",
+     explain_en:"Multiplying means adding the same number many times. 3 × 4 means '3, four times', which is 3+3+3+3=12.",
+     explain_bm:"Darab bermaksud menambah nombor yang sama beberapa kali. 3 × 4 bermaksud '3, empat kali', iaitu 3+3+3+3=12.",
+     example_en:"5 × 3 = 5+5+5 = 15.", example_bm:"5 × 3 = 5+5+5 = 15.",
+     check_q_en:"2 × 6 = ?", check_q_bm:"2 × 6 = ?", check_a:"12"},
+    {en:"Simple division", bm:"Bahagi ringkas", icon:"➗",
+     explain_en:"Dividing means sharing equally into groups. 12 ÷ 3 asks 'how many groups of 3 fit into 12?'",
+     explain_bm:"Bahagi bermaksud mengagihkan secara sama rata kepada kumpulan. 12 ÷ 3 bertanya 'berapa kumpulan 3 muat dalam 12?'",
+     example_en:"10 ÷ 2 = 5 (share 10 sweets into 2 equal groups, 5 each).", example_bm:"10 ÷ 2 = 5 (agihkan 10 gula-gula kepada 2 kumpulan sama).",
+     check_q_en:"8 ÷ 4 = ?", check_q_bm:"8 ÷ 4 = ?", check_a:"2"},
+    {en:"Fractions: halves & quarters", bm:"Pecahan: satu perdua dan satu perempat", icon:"🍕",
+     explain_en:"A fraction shows a part of a whole. Half (1/2) is 1 of 2 equal parts. A quarter (1/4) is 1 of 4 equal parts.",
+     explain_bm:"Pecahan menunjukkan sebahagian daripada keseluruhan. Satu perdua (1/2) ialah 1 daripada 2 bahagian sama.",
+     example_en:"Cut a pizza into 4 equal slices — each slice is 1/4.", example_bm:"Potong piza kepada 4 bahagian sama — setiap potong ialah 1/4.",
+     check_q_en:"If a cake is cut into 2 equal pieces, each piece is what fraction?", check_q_bm:"Jika kek dipotong kepada 2 bahagian sama, setiap bahagian ialah pecahan apa?", check_a:"1/2"},
+    {en:"Time to the nearest 5 minutes", bm:"Masa kepada 5 minit terdekat", icon:"⏰",
+     explain_en:"Each number on the clock face stands for 5 minutes. Count by 5s around the clock from 12.",
+     explain_bm:"Setiap angka pada muka jam mewakili 5 minit. Kira secara 5 mengelilingi jam bermula dari 12.",
+     example_en:"Minute hand on 4 means 4×5 = 20 minutes past the hour.", example_bm:"Jarum minit pada 4 bermaksud 4×5 = 20 minit selepas jam.",
+     check_q_en:"Minute hand on 2 means how many minutes?", check_q_bm:"Jarum minit pada 2 bermaksud berapa minit?", check_a:"10 minutes / 10 minit"},
+    {en:"Money up to RM50", bm:"Wang sehingga RM50", icon:"💵",
+     explain_en:"We add and subtract Ringgit amounts the same way as whole numbers, just with 'RM' in front.",
+     explain_bm:"Kita tambah dan tolak jumlah Ringgit sama seperti nombor bulat, cuma dengan 'RM' di depan.",
+     example_en:"RM15 + RM20 = RM35.", example_bm:"RM15 + RM20 = RM35.",
+     check_q_en:"RM40 − RM15 = ?", check_q_bm:"RM40 − RM15 = ?", check_a:"RM25"},
+  ],
+  std3: [
+    {en:"Numbers to 10,000", bm:"Nombor hingga 10,000", icon:"🔢",
+     explain_en:"Numbers to 10,000 add a thousands place. 3,254 means 3 thousands, 2 hundreds, 5 tens, 4 ones.",
+     explain_bm:"Nombor hingga 10,000 mempunyai tempat ribu. 3,254 bermaksud 3 ribu, 2 ratus, 5 puluh, 4 sa.",
+     example_en:"What is the value of 5 in 5,832? It's 5,000 (5 thousands).", example_bm:"Apakah nilai 5 dalam 5,832? Ia ialah 5,000 (5 ribu).",
+     check_q_en:"How many thousands are in 7,120?", check_q_bm:"Berapakah bilangan ribu dalam 7,120?", check_a:"7"},
+    {en:"Four operations within 10,000", bm:"Empat operasi dalam 10,000", icon:"🧮",
+     explain_en:"Add, subtract, multiply, and divide bigger numbers using the same column methods, just with more digits.",
+     explain_bm:"Tambah, tolak, darab, dan bahagi nombor lebih besar menggunakan kaedah lajur yang sama, cuma lebih banyak digit.",
+     example_en:"3,450 + 2,100 = 5,550.", example_bm:"3,450 + 2,100 = 5,550.",
+     check_q_en:"8,000 − 3,500 = ?", check_q_bm:"8,000 − 3,500 = ?", check_a:"4,500"},
+    {en:"Multiplication tables up to 10", bm:"Sifir hingga 10", icon:"✖️",
+     explain_en:"Knowing your times tables up to 10×10 by heart makes maths much faster. Practice a little every day.",
+     explain_bm:"Menghafal sifir hingga 10×10 menjadikan matematik lebih pantas. Berlatih sedikit setiap hari.",
+     example_en:"7 × 8 = 56.", example_bm:"7 × 8 = 56.",
+     check_q_en:"9 × 6 = ?", check_q_bm:"9 × 6 = ?", check_a:"54"},
+    {en:"Fractions & simple decimals", bm:"Pecahan dan perpuluhan ringkas", icon:"🔟",
+     explain_en:"A decimal is another way to write a fraction. 0.5 means the same as 1/2 — half of something.",
+     explain_bm:"Perpuluhan ialah cara lain untuk menulis pecahan. 0.5 bermaksud sama seperti 1/2 — separuh daripada sesuatu.",
+     example_en:"1/2 = 0.5, and 1/4 = 0.25.", example_bm:"1/2 = 0.5, dan 1/4 = 0.25.",
+     check_q_en:"What is 0.5 as a fraction?", check_q_bm:"Apakah 0.5 sebagai pecahan?", check_a:"1/2"},
+    {en:"Time: duration & calendar", bm:"Masa: tempoh dan kalendar", icon:"📅",
+     explain_en:"Duration is how long something takes. A calendar shows days, weeks, and months in order.",
+     explain_bm:"Tempoh ialah berapa lama sesuatu berlangsung. Kalendar menunjukkan hari, minggu, dan bulan mengikut urutan.",
+     example_en:"From 2:00pm to 4:00pm is a duration of 2 hours.", example_bm:"Dari 2:00 petang hingga 4:00 petang ialah tempoh 2 jam.",
+     check_q_en:"How many months are in a year?", check_q_bm:"Berapakah bilangan bulan dalam setahun?", check_a:"12"},
+    {en:"Perimeter of simple shapes", bm:"Ukur lilit bentuk ringkas", icon:"📐",
+     explain_en:"Perimeter is the total distance around the outside of a shape. Add up the length of every side.",
+     explain_bm:"Ukur lilit ialah jumlah jarak di sekeliling bentuk. Tambahkan panjang setiap sisi.",
+     example_en:"A square with side 5cm: perimeter = 5+5+5+5 = 20cm.", example_bm:"Segi empat sama dengan sisi 5cm: ukur lilit = 5+5+5+5 = 20cm.",
+     check_q_en:"Perimeter of a square with side 3cm?", check_q_bm:"Ukur lilit segi empat sama dengan sisi 3cm?", check_a:"12cm"},
+    {en:"Money up to RM100", bm:"Wang sehingga RM100", icon:"💵",
+     explain_en:"Larger money problems still use simple addition and subtraction — just with bigger amounts.",
+     explain_bm:"Masalah wang yang lebih besar masih menggunakan tambah dan tolak ringkas — cuma jumlah lebih besar.",
+     example_en:"RM45 + RM38 = RM83.", example_bm:"RM45 + RM38 = RM83.",
+     check_q_en:"RM100 − RM65 = ?", check_q_bm:"RM100 − RM65 = ?", check_a:"RM35"},
+  ],
+  std4: [
+    {en:"Numbers to 100,000", bm:"Nombor hingga 100,000", icon:"🔢",
+     explain_en:"Numbers this big add a ten-thousands place. Reading them in parts helps: 45,230 is 'forty-five thousand, two hundred thirty'.",
+     explain_bm:"Nombor sebesar ini mempunyai tempat puluh ribu. Membacanya mengikut bahagian membantu.",
+     example_en:"Value of 4 in 84,000 is 4,000.", example_bm:"Nilai 4 dalam 84,000 ialah 4,000.",
+     check_q_en:"How many ten-thousands in 63,000?", check_q_bm:"Berapakah puluh ribu dalam 63,000?", check_a:"6"},
+    {en:"Four operations, larger numbers", bm:"Empat operasi, nombor lebih besar", icon:"🧮",
+     explain_en:"The same methods you already know still work — just be careful lining up the digits correctly.",
+     explain_bm:"Kaedah yang sama masih berfungsi — cuma berhati-hati menyusun digit dengan betul.",
+     example_en:"45,000 + 12,500 = 57,500.", example_bm:"45,000 + 12,500 = 57,500.",
+     check_q_en:"90,000 − 34,500 = ?", check_q_bm:"90,000 − 34,500 = ?", check_a:"55,500"},
+    {en:"Fractions, decimals & basic percentage", bm:"Pecahan, perpuluhan dan peratus asas", icon:"💯",
+     explain_en:"Percent means 'out of 100'. 25% is the same as 25/100, which simplifies to 1/4.",
+     explain_bm:"Peratus bermaksud 'daripada 100'. 25% sama dengan 25/100, yang dipermudahkan kepada 1/4.",
+     example_en:"25% of 200 = 200 ÷ 4 = 50.", example_bm:"25% daripada 200 = 200 ÷ 4 = 50.",
+     check_q_en:"What is 10% of 500?", check_q_bm:"Apakah 10% daripada 500?", check_a:"50"},
+    {en:"Average (mean)", bm:"Purata (min)", icon:"📊",
+     explain_en:"To find the average, add all the numbers together, then divide by how many numbers there are.",
+     explain_bm:"Untuk cari purata, tambahkan semua nombor, kemudian bahagi dengan bilangan nombor.",
+     example_en:"Average of 4, 6, 8: (4+6+8)÷3 = 18÷3 = 6.", example_bm:"Purata bagi 4, 6, 8: (4+6+8)÷3 = 18÷3 = 6.",
+     check_q_en:"Average of 10, 20, 30?", check_q_bm:"Purata bagi 10, 20, 30?", check_a:"20"},
+    {en:"Area of rectangles & squares", bm:"Luas segi empat tepat dan segi empat sama", icon:"📐",
+     explain_en:"Area measures how much flat surface a shape covers. For rectangles, multiply length × width.",
+     explain_bm:"Luas mengukur berapa banyak permukaan rata yang diliputi bentuk. Untuk segi empat tepat, darab panjang × lebar.",
+     example_en:"Rectangle 6cm × 4cm: area = 6×4 = 24cm².", example_bm:"Segi empat tepat 6cm × 4cm: luas = 6×4 = 24cm².",
+     check_q_en:"Area of a square with side 5cm?", check_q_bm:"Luas segi empat sama dengan sisi 5cm?", check_a:"25cm²"},
+    {en:"Basic 24-hour time", bm:"Masa 24 jam asas", icon:"⏰",
+     explain_en:"24-hour time counts all the way to 23:59 without needing 'am' or 'pm'. 1:00pm becomes 13:00.",
+     explain_bm:"Masa 24 jam dikira sehingga 23:59 tanpa memerlukan 'pagi' atau 'petang'. 1:00 petang menjadi 13:00.",
+     example_en:"3:00pm in 24-hour time is 15:00 (add 12 to the pm hour).", example_bm:"3:00 petang dalam masa 24 jam ialah 15:00.",
+     check_q_en:"What is 7:00pm in 24-hour time?", check_q_bm:"Apakah 7:00 petang dalam masa 24 jam?", check_a:"19:00"},
+  ],
+  std5: [
+    {en:"Numbers to 1,000,000", bm:"Nombor hingga 1,000,000", icon:"🔢",
+     explain_en:"A million has 7 digits. Break big numbers into groups of three from the right to read them more easily.",
+     explain_bm:"Sejuta mempunyai 7 digit. Pecahkan nombor besar kepada kumpulan tiga dari kanan untuk memudahkan bacaan.",
+     example_en:"560,000 + 245,000 = 805,000.", example_bm:"560,000 + 245,000 = 805,000.",
+     check_q_en:"900,000 − 375,000 = ?", check_q_bm:"900,000 − 375,000 = ?", check_a:"525,000"},
+    {en:"Mixed: fractions, decimals, percentages", bm:"Bercampur: pecahan, perpuluhan, peratus", icon:"💯",
+     explain_en:"Fractions, decimals, and percentages are all different ways to show the same value. Practice converting between them.",
+     explain_bm:"Pecahan, perpuluhan, dan peratus adalah cara berbeza untuk menunjukkan nilai yang sama.",
+     example_en:"3/5 = 0.6 = 60%.", example_bm:"3/5 = 0.6 = 60%.",
+     check_q_en:"What is 3/4 as a percentage?", check_q_bm:"Apakah 3/4 sebagai peratus?", check_a:"75%"},
+    {en:"Ratio", bm:"Nisbah", icon:"⚖️",
+     explain_en:"A ratio compares two amounts. 4:8 means for every 4 of one thing, there are 8 of another — simplify by dividing both sides by the same number.",
+     explain_bm:"Nisbah membandingkan dua jumlah. Permudahkan dengan membahagikan kedua-dua belah dengan nombor sama.",
+     example_en:"4:8 simplified (÷4) = 1:2.", example_bm:"4:8 dipermudahkan (÷4) = 1:2.",
+     check_q_en:"Simplify 6:9", check_q_bm:"Permudahkan 6:9", check_a:"2:3"},
+    {en:"Volume of cubes & cuboids", bm:"Isipadu kubus dan kuboid", icon:"🧊",
+     explain_en:"Volume measures how much space a solid shape takes up. For a cube, multiply side × side × side.",
+     explain_bm:"Isipadu mengukur berapa banyak ruang yang diambil oleh bentuk pepejal. Untuk kubus, darab sisi × sisi × sisi.",
+     example_en:"Cube with side 3cm: volume = 3×3×3 = 27cm³.", example_bm:"Kubus dengan sisi 3cm: isipadu = 3×3×3 = 27cm³.",
+     check_q_en:"Volume of a cube with side 2cm?", check_q_bm:"Isipadu kubus dengan sisi 2cm?", check_a:"8cm³"},
+    {en:"Data handling: pie charts", bm:"Pengendalian data: carta pai", icon:"📊",
+     explain_en:"A pie chart shows parts of a whole as slices of a circle. Bigger slices mean bigger percentages.",
+     explain_bm:"Carta pai menunjukkan bahagian daripada keseluruhan sebagai hirisan bulatan.",
+     example_en:"If 25% of 80 students liked Maths, that's 20 students.", example_bm:"Jika 25% daripada 80 murid suka Matematik, itu 20 orang murid.",
+     check_q_en:"If 50% of 60 students liked Science, how many is that?", check_q_bm:"Jika 50% daripada 60 murid suka Sains, berapa orangkah itu?", check_a:"30"},
+    {en:"Basic speed & distance", bm:"Kelajuan dan jarak asas", icon:"🚗",
+     explain_en:"Speed tells us how fast something moves — distance travelled divided by the time taken.",
+     explain_bm:"Kelajuan memberitahu betapa laju sesuatu bergerak — jarak dilalui dibahagi dengan masa diambil.",
+     example_en:"A car travels 100km in 2 hours: speed = 100÷2 = 50km/h.", example_bm:"Sebuah kereta menempuh 100km dalam 2 jam: kelajuan = 100÷2 = 50km/j.",
+     check_q_en:"A cyclist travels 60km in 3 hours. What's their speed?", check_q_bm:"Penunggang basikal menempuh 60km dalam 3 jam. Apakah kelajuannya?", check_a:"20km/h"},
+  ],
+  std6: [
+    {en:"Numbers to 10,000,000", bm:"Nombor hingga 10,000,000", icon:"🔢",
+     explain_en:"Ten million has 8 digits. The same place-value rules apply, just with more digits to keep track of.",
+     explain_bm:"Sepuluh juta mempunyai 8 digit. Peraturan nilai tempat yang sama digunakan, cuma lebih banyak digit.",
+     example_en:"2,450,000 + 3,675,000 = 6,125,000.", example_bm:"2,450,000 + 3,675,000 = 6,125,000.",
+     check_q_en:"9,000,000 − 3,250,000 = ?", check_q_bm:"9,000,000 − 3,250,000 = ?", check_a:"5,750,000"},
+    {en:"All operations combined, with brackets", bm:"Semua operasi digabungkan, termasuk kurungan", icon:"🧮",
+     explain_en:"When a sum has brackets, solve what's inside the brackets first, then work through the rest in order.",
+     explain_bm:"Apabila pengiraan mempunyai kurungan, selesaikan apa yang di dalam kurungan dahulu, kemudian selebihnya.",
+     example_en:"(3 + 2) × 4 = 5 × 4 = 20.", example_bm:"(3 + 2) × 4 = 5 × 4 = 20.",
+     check_q_en:"(10 − 4) × 2 = ?", check_q_bm:"(10 − 4) × 2 = ?", check_a:"12"},
+    {en:"Ratio & proportion", bm:"Nisbah dan kadaran", icon:"⚖️",
+     explain_en:"Proportion means two ratios are equal. If you know one ratio, you can find a missing number in another that matches it.",
+     explain_bm:"Kadaran bermaksud dua nisbah adalah sama. Anda boleh mencari nombor hilang dalam nisbah lain yang sepadan.",
+     example_en:"If 3 pens cost RM6, 1 pen costs RM2, so 5 pens cost RM10.", example_bm:"Jika 3 pen berharga RM6, 1 pen berharga RM2, jadi 5 pen berharga RM10.",
+     check_q_en:"If 2 books cost RM10, how much do 5 books cost?", check_q_bm:"Jika 2 buku berharga RM10, berapakah harga 5 buku?", check_a:"RM25"},
+    {en:"Introduction to algebra", bm:"Pengenalan algebra", icon:"🔤",
+     explain_en:"A letter like x stands for an unknown number. Solve for x by doing the same operation to both sides of the equation.",
+     explain_bm:"Huruf seperti x mewakili nombor yang tidak diketahui. Lakukan operasi yang sama pada kedua-dua belah persamaan.",
+     example_en:"x + 15 = 40 → x = 40 − 15 = 25.", example_bm:"x + 15 = 40 → x = 40 − 15 = 25.",
+     check_q_en:"Solve: y − 8 = 12", check_q_bm:"Selesaikan: y − 8 = 12", check_a:"y = 20"},
+    {en:"Angles, circles & basic geometry", bm:"Sudut, bulatan dan geometri asas", icon:"📐",
+     explain_en:"Angles are measured in degrees. The angles in a triangle always add up to 180°. A circle's diameter is twice its radius.",
+     explain_bm:"Sudut diukur dalam darjah. Sudut dalam segi tiga sentiasa berjumlah 180°. Diameter ialah dua kali jejari.",
+     example_en:"Radius = 7cm → diameter = 2×7 = 14cm.", example_bm:"Jejari = 7cm → diameter = 2×7 = 14cm.",
+     check_q_en:"If radius is 5cm, what's the diameter?", check_q_bm:"Jika jejari 5cm, apakah diameternya?", check_a:"10cm"},
+    {en:"Statistics: mean & data representation", bm:"Statistik: min dan perwakilan data", icon:"📊",
+     explain_en:"Mean is another word for average. Data can be shown in tables, bar charts, or line graphs to make patterns easier to see.",
+     explain_bm:"Min ialah perkataan lain untuk purata. Data boleh ditunjukkan dalam jadual, carta bar, atau graf garis.",
+     example_en:"Mean of 5, 7, 9: (5+7+9)÷3 = 7.", example_bm:"Min bagi 5, 7, 9: (5+7+9)÷3 = 7.",
+     check_q_en:"Mean of 4, 8, 12?", check_q_bm:"Min bagi 4, 8, 12?", check_a:"8"},
+    {en:"Consumer maths: discounts & interest", bm:"Matematik pengguna: diskaun dan faedah", icon:"🏷️",
+     explain_en:"A discount reduces a price by a percentage. Simple interest adds a percentage to savings or a loan over time.",
+     explain_bm:"Diskaun mengurangkan harga mengikut peratus. Faedah ringkas menambah peratus kepada simpanan atau pinjaman.",
+     example_en:"RM100 item with 20% discount: 20% of 100=20, new price = RM80.", example_bm:"Barang RM100 dengan diskaun 20%: 20% daripada 100=20, harga baharu = RM80.",
+     check_q_en:"A RM50 item has a 10% discount. What's the new price?", check_q_bm:"Barang RM50 mempunyai diskaun 10%. Apakah harga baharu?", check_a:"RM45"},
+  ],
+};
+
+/* ============================================================
+   QUESTION BANKS — bilingual (EN / BM), KSSR-aligned
+============================================================ */
+const BANK = {
+  preschool: [
+    {q_en:"Count the stars: ⭐⭐⭐ How many stars?", q_bm:"Kira bintang: ⭐⭐⭐ Berapakah bilangan bintang?", choices:["2","3","4","5"], answer:"3", explain_en:"1, 2, 3 — there are 3 stars!", explain_bm:"1, 2, 3 — ada 3 buah bintang!"},
+    {q_en:"Which shape has 3 sides?", q_bm:"Bentuk manakah mempunyai 3 sisi?", choices:["Triangle / Segi Tiga","Square / Segi Empat Sama","Circle / Bulatan","Star / Bintang"], answer:"Triangle / Segi Tiga", explain_en:"A triangle always has exactly 3 straight sides.", explain_bm:"Segi tiga sentiasa mempunyai tepat 3 sisi lurus."},
+    {q_en:"2 + 1 = ?", q_bm:"2 + 1 = ?", choices:["2","3","4","5"], answer:"3", explain_en:"Start at 2, count 1 more: 2, 3.", explain_bm:"Mula di 2, kira 1 lagi: 2, 3."},
+    {q_en:"Which number comes after 4?", q_bm:"Nombor manakah datang selepas 4?", choices:["3","5","6","7"], answer:"5", explain_en:"Counting up: 1,2,3,4,5 — after 4 comes 5.", explain_bm:"Kira menaik: 1,2,3,4,5 — selepas 4 ialah 5."},
+    {q_en:"Which group has MORE? 🍎🍎🍎 or 🍎🍎", q_bm:"Kumpulan manakah LEBIH BANYAK? 🍎🍎🍎 atau 🍎🍎", choices:["First group / Kumpulan Pertama","Second group / Kumpulan Kedua"], answer:"First group / Kumpulan Pertama", explain_en:"3 apples is more than 2 apples.", explain_bm:"3 biji epal lebih banyak daripada 2 biji epal."},
+    {q_en:"How many fingers on one hand?", q_bm:"Berapakah bilangan jari pada sebelah tangan?", choices:["4","5","6","10"], answer:"5", explain_en:"One hand has 5 fingers.", explain_bm:"Sebelah tangan mempunyai 5 jari."},
+    {q_en:"Which shape is round with no corners?", q_bm:"Bentuk manakah bulat dan tiada bucu?", choices:["Square / Segi Empat Sama","Circle / Bulatan","Triangle / Segi Tiga","Rectangle / Segi Empat Tepat"], answer:"Circle / Bulatan", explain_en:"A circle is perfectly round and has no corners.", explain_bm:"Bulatan adalah bulat sepenuhnya dan tiada bucu."},
+    {q_en:"1 + 1 = ?", q_bm:"1 + 1 = ?", choices:["1","2","3","4"], answer:"2", explain_en:"One plus one more makes two.", explain_bm:"Satu tambah satu lagi menjadi dua."},
+    {q_en:"Count: 🐟🐟🐟🐟 How many fish?", q_bm:"Kira: 🐟🐟🐟🐟 Berapakah bilangan ikan?", choices:["3","4","5","6"], answer:"4", explain_en:"1,2,3,4 — four fish!", explain_bm:"1,2,3,4 — empat ekor ikan!"},
+    {q_en:"Which is the smallest number?", q_bm:"Nombor manakah yang paling kecil?", choices:["5","2","8","3"], answer:"2", explain_en:"2 is the smallest number in the list.", explain_bm:"2 ialah nombor paling kecil dalam senarai."},
+    {q_en:"3 − 1 = ?", q_bm:"3 − 1 = ?", choices:["1","2","3","4"], answer:"2", explain_en:"Take 1 away from 3, and 2 is left.", explain_bm:"Tolak 1 daripada 3, baki 2."},
+    {q_en:"Which shape has 4 equal sides?", q_bm:"Bentuk manakah mempunyai 4 sisi sama panjang?", choices:["Triangle / Segi Tiga","Square / Segi Empat Sama","Circle / Bulatan","Oval / Bujur"], answer:"Square / Segi Empat Sama", explain_en:"A square has 4 sides that are all the same length.", explain_bm:"Segi empat sama mempunyai 4 sisi yang sama panjang."},
+  ],
+  std1: [
+    {q_en:"45 + 3 = ?", q_bm:"45 + 3 = ?", choices:["46","47","48","49"], answer:"48", explain_en:"45, 46, 47, 48 — count on 3 from 45.", explain_bm:"45, 46, 47, 48 — kira 3 lagi daripada 45."},
+    {q_en:"Which number is between 27 and 29?", q_bm:"Nombor manakah di antara 27 dan 29?", choices:["26","28","30","25"], answer:"28", explain_en:"28 sits right between 27 and 29.", explain_bm:"28 terletak tepat di antara 27 dan 29."},
+    {q_en:"60 − 10 = ?", q_bm:"60 − 10 = ?", choices:["40","50","60","70"], answer:"50", explain_en:"Take away 1 ten from 6 tens leaves 5 tens = 50.", explain_bm:"Tolak 1 puluh daripada 6 puluh, baki 5 puluh = 50."},
+    {q_en:"How many sen make RM1?", q_bm:"Berapakah bilangan sen menjadikan RM1?", choices:["10","50","100","1000"], answer:"100", explain_en:"100 sen = RM1 in Malaysian currency.", explain_bm:"100 sen = RM1 dalam matawang Malaysia."},
+    {q_en:"The clock shows 3:00. What time is it?", q_bm:"Jam menunjukkan 3:00. Pukul berapakah ini?", choices:["Three o'clock / Pukul Tiga","Three thirty / Pukul Tiga Setengah","Two o'clock / Pukul Dua","Four o'clock / Pukul Empat"], answer:"Three o'clock / Pukul Tiga", explain_en:"When the minute hand is on 12 and hour hand on 3, it's three o'clock.", explain_bm:"Apabila jarum minit di angka 12 dan jarum jam di angka 3, ia ialah pukul tiga."},
+    {q_en:"Which number is the largest: 34, 43, 24, 42?", q_bm:"Nombor manakah paling besar: 34, 43, 24, 42?", choices:["34","43","24","42"], answer:"43", explain_en:"Compare the tens digit first — 4 tens is the biggest, and 43 > 42.", explain_bm:"Bandingkan digit puluh dahulu — 4 puluh adalah paling besar, dan 43 > 42."},
+    {q_en:"7 + 8 = ?", q_bm:"7 + 8 = ?", choices:["14","15","16","17"], answer:"15", explain_en:"7 + 8 = 7 + 7 + 1 = 14 + 1 = 15.", explain_bm:"7 + 8 = 7 + 7 + 1 = 14 + 1 = 15."},
+    {q_en:"A triangle has how many sides?", q_bm:"Segi tiga mempunyai berapakah sisi?", choices:["2","3","4","5"], answer:"3", explain_en:"Tri- means three, so a triangle has 3 sides.", explain_bm:"Tri- bermaksud tiga, jadi segi tiga ada 3 sisi."},
+    {q_en:"90 − 20 = ?", q_bm:"90 − 20 = ?", choices:["60","70","80","50"], answer:"70", explain_en:"9 tens minus 2 tens leaves 7 tens = 70.", explain_bm:"9 puluh tolak 2 puluh, baki 7 puluh = 70."},
+    {q_en:"What comes next: 10, 20, 30, __?", q_bm:"Apakah seterusnya: 10, 20, 30, __?", choices:["35","40","45","50"], answer:"40", explain_en:"The pattern adds 10 each time, so next is 40.", explain_bm:"Corak ini tambah 10 setiap kali, jadi seterusnya ialah 40."},
+    {q_en:"5 + 5 + 5 = ?", q_bm:"5 + 5 + 5 = ?", choices:["10","15","20","25"], answer:"15", explain_en:"5 + 5 = 10, then 10 + 5 = 15.", explain_bm:"5 + 5 = 10, kemudian 10 + 5 = 15."},
+    {q_en:"How many days are in a week?", q_bm:"Berapakah bilangan hari dalam seminggu?", choices:["5","6","7","8"], answer:"7", explain_en:"A week has 7 days: Sunday to Saturday.", explain_bm:"Seminggu ada 7 hari: Ahad hingga Sabtu."},
+  ],
+  std2: [
+    {q_en:"3 × 4 = ?", q_bm:"3 × 4 = ?", choices:["10","11","12","13"], answer:"12", explain_en:"3 groups of 4 = 4+4+4 = 12.", explain_bm:"3 kumpulan 4 = 4+4+4 = 12."},
+    {q_en:"What is half of 10?", q_bm:"Apakah separuh daripada 10?", choices:["4","5","6","8"], answer:"5", explain_en:"Splitting 10 into 2 equal parts gives 5 each.", explain_bm:"Membahagikan 10 kepada 2 bahagian sama memberi 5 setiap satu."},
+    {q_en:"200 + 350 = ?", q_bm:"200 + 350 = ?", choices:["500","550","600","450"], answer:"550", explain_en:"200 + 350: add hundreds (2+3=5) and tens (0+50) = 550.", explain_bm:"200 + 350: tambah ratus (2+3=5) dan puluh (0+50) = 550."},
+    {q_en:"12 ÷ 4 = ?", q_bm:"12 ÷ 4 = ?", choices:["2","3","4","5"], answer:"3", explain_en:"4 groups of 3 make 12, so 12 ÷ 4 = 3.", explain_bm:"4 kumpulan 3 menjadikan 12, jadi 12 ÷ 4 = 3."},
+    {q_en:"5 × 5 = ?", q_bm:"5 × 5 = ?", choices:["20","25","30","15"], answer:"25", explain_en:"5 groups of 5 = 25.", explain_bm:"5 kumpulan 5 = 25."},
+    {q_en:"Which fraction shows one quarter?", q_bm:"Pecahan manakah menunjukkan satu perempat?", choices:["1/2","1/4","1/3","2/4"], answer:"1/4", explain_en:"One quarter means 1 out of 4 equal parts, written 1/4.", explain_bm:"Satu perempat bermaksud 1 daripada 4 bahagian sama, ditulis 1/4."},
+    {q_en:"The clock's minute hand points to 3. How many minutes is that?", q_bm:"Jarum minit jam menunjuk ke angka 3. Berapa minitkah itu?", choices:["5 minutes / 5 minit","10 minutes / 10 minit","15 minutes / 15 minit","20 minutes / 20 minit"], answer:"15 minutes / 15 minit", explain_en:"Each number on a clock face equals 5 minutes; 3 × 5 = 15.", explain_bm:"Setiap angka pada muka jam bersamaan 5 minit; 3 × 5 = 15."},
+    {q_en:"RM20 − RM8 = ?", q_bm:"RM20 − RM8 = ?", choices:["RM10","RM11","RM12","RM13"], answer:"RM12", explain_en:"20 − 8 = 12, so it's RM12.", explain_bm:"20 − 8 = 12, jadi RM12."},
+    {q_en:"700 − 250 = ?", q_bm:"700 − 250 = ?", choices:["400","450","500","550"], answer:"450", explain_en:"700 − 250: 700 − 200 = 500, then 500 − 50 = 450.", explain_bm:"700 − 250: 700 − 200 = 500, kemudian 500 − 50 = 450."},
+    {q_en:"4 × 6 = ?", q_bm:"4 × 6 = ?", choices:["20","22","24","26"], answer:"24", explain_en:"4 groups of 6 = 24.", explain_bm:"4 kumpulan 6 = 24."},
+    {q_en:"18 ÷ 2 = ?", q_bm:"18 ÷ 2 = ?", choices:["7","8","9","10"], answer:"9", explain_en:"2 groups of 9 make 18.", explain_bm:"2 kumpulan 9 menjadikan 18."},
+    {q_en:"Which of these is an even number?", q_bm:"Yang manakah nombor genap?", choices:["15","22","33","41"], answer:"22", explain_en:"Even numbers end in 0,2,4,6,8 — 22 ends in 2.", explain_bm:"Nombor genap berakhir dengan 0,2,4,6,8 — 22 berakhir dengan 2."},
+  ],
+  std3: [
+    {q_en:"6 × 7 = ?", q_bm:"6 × 7 = ?", choices:["40","42","44","48"], answer:"42", explain_en:"6 groups of 7 = 42.", explain_bm:"6 kumpulan 7 = 42."},
+    {q_en:"3450 + 2100 = ?", q_bm:"3450 + 2100 = ?", choices:["5450","5550","5650","5350"], answer:"5550", explain_en:"3450 + 2100: 3000+2000=5000, 450+100=550, total 5550.", explain_bm:"3450 + 2100: 3000+2000=5000, 450+100=550, jumlah 5550."},
+    {q_en:"What is 0.5 written as a fraction?", q_bm:"Apakah 0.5 ditulis sebagai pecahan?", choices:["1/2","1/4","1/5","2/5"], answer:"1/2", explain_en:"0.5 is exactly half, which is 1/2.", explain_bm:"0.5 ialah tepat separuh, iaitu 1/2."},
+    {q_en:"81 ÷ 9 = ?", q_bm:"81 ÷ 9 = ?", choices:["8","9","10","11"], answer:"9", explain_en:"9 groups of 9 make 81.", explain_bm:"9 kumpulan 9 menjadikan 81."},
+    {q_en:"Perimeter of a square with side 5cm = ?", q_bm:"Ukur lilit segi empat sama dengan sisi 5cm = ?", choices:["10cm","15cm","20cm","25cm"], answer:"20cm", explain_en:"Perimeter = 4 × side = 4 × 5cm = 20cm.", explain_bm:"Ukur lilit = 4 × sisi = 4 × 5cm = 20cm."},
+    {q_en:"9 × 8 = ?", q_bm:"9 × 8 = ?", choices:["63","70","72","81"], answer:"72", explain_en:"9 groups of 8 = 72.", explain_bm:"9 kumpulan 8 = 72."},
+    {q_en:"8000 − 3500 = ?", q_bm:"8000 − 3500 = ?", choices:["4300","4400","4500","4600"], answer:"4500", explain_en:"8000 − 3500: 8000 − 3000 = 5000, then 5000 − 500 = 4500.", explain_bm:"8000 − 3500: 8000 − 3000 = 5000, kemudian 5000 − 500 = 4500."},
+    {q_en:"Which is greater, 3/4 or 1/2?", q_bm:"Yang manakah lebih besar, 3/4 atau 1/2?", choices:["3/4","1/2","They are equal / Sama Sahaja"], answer:"3/4", explain_en:"3/4 = 0.75 and 1/2 = 0.5, so 3/4 is bigger.", explain_bm:"3/4 = 0.75 dan 1/2 = 0.5, jadi 3/4 lebih besar."},
+    {q_en:"7 × 9 = ?", q_bm:"7 × 9 = ?", choices:["56","63","72","81"], answer:"63", explain_en:"7 groups of 9 = 63.", explain_bm:"7 kumpulan 9 = 63."},
+    {q_en:"2.5 + 1.5 = ?", q_bm:"2.5 + 1.5 = ?", choices:["3","3.5","4","4.5"], answer:"4", explain_en:"2.5 + 1.5: whole numbers 2+1=3, decimals 0.5+0.5=1, total 4.", explain_bm:"2.5 + 1.5: nombor bulat 2+1=3, perpuluhan 0.5+0.5=1, jumlah 4."},
+    {q_en:"10 × 6 = ?", q_bm:"10 × 6 = ?", choices:["16","60","66","600"], answer:"60", explain_en:"10 groups of 6 = 60.", explain_bm:"10 kumpulan 6 = 60."},
+    {q_en:"How many centimetres are in a metre?", q_bm:"Berapakah bilangan sentimeter dalam satu meter?", choices:["10","100","1000","10000"], answer:"100", explain_en:"1 metre = 100 centimetres.", explain_bm:"1 meter = 100 sentimeter."},
+  ],
+  std4: [
+    {q_en:"What is 25% of 200?", q_bm:"Apakah 25% daripada 200?", choices:["25","50","75","100"], answer:"50", explain_en:"25% means a quarter; 200 ÷ 4 = 50.", explain_bm:"25% bermaksud satu perempat; 200 ÷ 4 = 50."},
+    {q_en:"Area of a rectangle 6cm × 4cm = ?", q_bm:"Luas segi empat tepat 6cm × 4cm = ?", choices:["20cm²","24cm²","26cm²","30cm²"], answer:"24cm²", explain_en:"Area = length × width = 6 × 4 = 24cm².", explain_bm:"Luas = panjang × lebar = 6 × 4 = 24cm²."},
+    {q_en:"Average of 4, 6, 8 = ?", q_bm:"Purata bagi 4, 6, 8 = ?", choices:["5","6","7","8"], answer:"6", explain_en:"Add them: 4+6+8=18, divide by 3 numbers = 6.", explain_bm:"Tambah semua: 4+6+8=18, bahagi dengan 3 nombor = 6."},
+    {q_en:"45000 + 12500 = ?", q_bm:"45000 + 12500 = ?", choices:["56500","57000","57500","58000"], answer:"57500", explain_en:"45000 + 12500 = 57500.", explain_bm:"45000 + 12500 = 57500."},
+    {q_en:"3/4 written as a decimal = ?", q_bm:"3/4 ditulis sebagai perpuluhan = ?", choices:["0.25","0.5","0.75","0.8"], answer:"0.75", explain_en:"3 ÷ 4 = 0.75.", explain_bm:"3 ÷ 4 = 0.75."},
+    {q_en:"12 × 12 = ?", q_bm:"12 × 12 = ?", choices:["124","134","144","154"], answer:"144", explain_en:"12 groups of 12 = 144.", explain_bm:"12 kumpulan 12 = 144."},
+    {q_en:"What is 10% of 500?", q_bm:"Apakah 10% daripada 500?", choices:["5","50","100","150"], answer:"50", explain_en:"10% means one tenth; 500 ÷ 10 = 50.", explain_bm:"10% bermaksud satu persepuluh; 500 ÷ 10 = 50."},
+    {q_en:"90000 − 34500 = ?", q_bm:"90000 − 34500 = ?", choices:["54500","55000","55500","56000"], answer:"55500", explain_en:"90000 − 34500 = 55500.", explain_bm:"90000 − 34500 = 55500."},
+    {q_en:"Perimeter of a rectangle 8cm × 3cm = ?", q_bm:"Ukur lilit segi empat tepat 8cm × 3cm = ?", choices:["18cm","20cm","22cm","24cm"], answer:"22cm", explain_en:"Perimeter = 2 × (length + width) = 2 × 11 = 22cm.", explain_bm:"Ukur lilit = 2 × (panjang + lebar) = 2 × 11 = 22cm."},
+    {q_en:"1/2 + 1/4 = ?", q_bm:"1/2 + 1/4 = ?", choices:["1/2","3/4","2/6","1"], answer:"3/4", explain_en:"1/2 = 2/4, so 2/4 + 1/4 = 3/4.", explain_bm:"1/2 = 2/4, jadi 2/4 + 1/4 = 3/4."},
+    {q_en:"144 ÷ 12 = ?", q_bm:"144 ÷ 12 = ?", choices:["10","11","12","13"], answer:"12", explain_en:"12 groups of 12 make 144.", explain_bm:"12 kumpulan 12 menjadikan 144."},
+    {q_en:"Round 3456 to the nearest hundred", q_bm:"Bundarkan 3456 kepada ratus terdekat", choices:["3400","3450","3500","3460"], answer:"3500", explain_en:"3456 is closer to 3500 than 3400.", explain_bm:"3456 lebih dekat kepada 3500 berbanding 3400."},
+  ],
+  std5: [
+    {q_en:"Ratio of 4 apples to 8 oranges in simplest form?", q_bm:"Nisbah 4 epal kepada 8 oren dalam bentuk termudah?", choices:["1:2","2:4","4:8","1:4"], answer:"1:2", explain_en:"Divide both sides by 4: 4:8 becomes 1:2.", explain_bm:"Bahagikan kedua-dua belah dengan 4: 4:8 menjadi 1:2."},
+    {q_en:"Volume of a cube with side 3cm = ?", q_bm:"Isipadu kubus dengan sisi 3cm = ?", choices:["9cm³","18cm³","27cm³","36cm³"], answer:"27cm³", explain_en:"Volume = side × side × side = 3×3×3 = 27cm³.", explain_bm:"Isipadu = sisi × sisi × sisi = 3×3×3 = 27cm³."},
+    {q_en:"What is 15% of 400?", q_bm:"Apakah 15% daripada 400?", choices:["40","50","60","70"], answer:"60", explain_en:"10% of 400 is 40, 5% is 20, so 15% = 40+20 = 60.", explain_bm:"10% daripada 400 ialah 40, 5% ialah 20, jadi 15% = 40+20 = 60."},
+    {q_en:"560000 + 245000 = ?", q_bm:"560000 + 245000 = ?", choices:["785000","795000","805000","815000"], answer:"805000", explain_en:"560000 + 245000 = 805000.", explain_bm:"560000 + 245000 = 805000."},
+    {q_en:"Average of 10, 20, 30, 40 = ?", q_bm:"Purata bagi 10, 20, 30, 40 = ?", choices:["20","25","30","35"], answer:"25", explain_en:"Sum = 100, divide by 4 numbers = 25.", explain_bm:"Jumlah = 100, bahagi dengan 4 nombor = 25."},
+    {q_en:"3/5 written as a percentage = ?", q_bm:"3/5 ditulis sebagai peratus = ?", choices:["50%","60%","65%","70%"], answer:"60%", explain_en:"3/5 = 6/10 = 60%.", explain_bm:"3/5 = 6/10 = 60%."},
+    {q_en:"900000 − 375000 = ?", q_bm:"900000 − 375000 = ?", choices:["515000","525000","535000","545000"], answer:"525000", explain_en:"900000 − 375000 = 525000.", explain_bm:"900000 − 375000 = 525000."},
+    {q_en:"A pie chart shows 25% liked Maths, out of 80 students. How many liked Maths?", q_bm:"Carta pai menunjukkan 25% suka Matematik, daripada 80 murid. Berapa orang suka Matematik?", choices:["15","20","25","30"], answer:"20", explain_en:"25% of 80 is a quarter of 80, which is 20.", explain_bm:"25% daripada 80 ialah satu perempat daripada 80, iaitu 20."},
+    {q_en:"0.6 × 100 = ?", q_bm:"0.6 × 100 = ?", choices:["6","60","600","0.6"], answer:"60", explain_en:"Multiplying a decimal by 100 moves the point 2 places right: 0.6 → 60.", explain_bm:"Mendarab perpuluhan dengan 100 menggerakkan titik perpuluhan 2 tempat ke kanan: 0.6 → 60."},
+    {q_en:"Simplify 6/8", q_bm:"Permudahkan 6/8", choices:["1/2","3/4","2/3","5/6"], answer:"3/4", explain_en:"Divide top and bottom by 2: 6/8 becomes 3/4.", explain_bm:"Bahagikan atas dan bawah dengan 2: 6/8 menjadi 3/4."},
+    {q_en:"Area of a triangle with base 10cm and height 6cm = ?", q_bm:"Luas segi tiga dengan tapak 10cm dan tinggi 6cm = ?", choices:["30cm²","40cm²","50cm²","60cm²"], answer:"30cm²", explain_en:"Area = ½ × base × height = ½ × 10 × 6 = 30cm².", explain_bm:"Luas = ½ × tapak × tinggi = ½ × 10 × 6 = 30cm²."},
+    {q_en:"7 × 8 × 2 = ?", q_bm:"7 × 8 × 2 = ?", choices:["106","112","118","124"], answer:"112", explain_en:"7×8=56, then 56×2=112.", explain_bm:"7×8=56, kemudian 56×2=112."},
+  ],
+  std6: [
+    {q_en:"Solve for x: x + 15 = 40", q_bm:"Selesaikan untuk x: x + 15 = 40", choices:["20","25","30","35"], answer:"25", explain_en:"Subtract 15 from both sides: x = 40 − 15 = 25.", explain_bm:"Tolak 15 daripada kedua-dua belah: x = 40 − 15 = 25."},
+    {q_en:"Sum of angles in a triangle = ?", q_bm:"Jumlah sudut dalam segi tiga = ?", choices:["90°","180°","270°","360°"], answer:"180°", explain_en:"The three angles of any triangle always add up to 180°.", explain_bm:"Tiga sudut dalam mana-mana segi tiga sentiasa berjumlah 180°."},
+    {q_en:"If 3 pens cost RM6, how much do 5 pens cost?", q_bm:"Jika 3 batang pen berharga RM6, berapakah harga 5 batang pen?", choices:["RM8","RM9","RM10","RM12"], answer:"RM10", explain_en:"1 pen costs RM2 (RM6÷3), so 5 pens cost 5×RM2=RM10.", explain_bm:"1 pen berharga RM2 (RM6÷3), jadi 5 pen berharga 5×RM2=RM10."},
+    {q_en:"2,450,000 + 3,675,000 = ?", q_bm:"2,450,000 + 3,675,000 = ?", choices:["6,025,000","6,125,000","6,225,000","6,325,000"], answer:"6,125,000", explain_en:"2,450,000 + 3,675,000 = 6,125,000.", explain_bm:"2,450,000 + 3,675,000 = 6,125,000."},
+    {q_en:"Solve for y: 3y = 27", q_bm:"Selesaikan untuk y: 3y = 27", choices:["6","7","8","9"], answer:"9", explain_en:"Divide both sides by 3: y = 27 ÷ 3 = 9.", explain_bm:"Bahagikan kedua-dua belah dengan 3: y = 27 ÷ 3 = 9."},
+    {q_en:"What is the diameter if the radius is 7cm?", q_bm:"Apakah diameter jika jejari ialah 7cm?", choices:["7cm","10cm","14cm","21cm"], answer:"14cm", explain_en:"Diameter = 2 × radius = 2 × 7cm = 14cm.", explain_bm:"Diameter = 2 × jejari = 2 × 7cm = 14cm."},
+    {q_en:"Convert 3/8 to a percentage", q_bm:"Tukarkan 3/8 kepada peratus", choices:["32.5%","35%","37.5%","40%"], answer:"37.5%", explain_en:"3 ÷ 8 = 0.375 = 37.5%.", explain_bm:"3 ÷ 8 = 0.375 = 37.5%."},
+    {q_en:"9,000,000 − 3,250,000 = ?", q_bm:"9,000,000 − 3,250,000 = ?", choices:["5,650,000","5,750,000","5,850,000","5,950,000"], answer:"5,750,000", explain_en:"9,000,000 − 3,250,000 = 5,750,000.", explain_bm:"9,000,000 − 3,250,000 = 5,750,000."},
+    {q_en:"A number is doubled, then 5 is added, to get 21. What is the number?", q_bm:"Suatu nombor digandakan, kemudian 5 ditambah, untuk mendapat 21. Apakah nombor itu?", choices:["6","7","8","9"], answer:"8", explain_en:"Work backwards: 21−5=16, then 16÷2=8.", explain_bm:"Kerja ke belakang: 21−5=16, kemudian 16÷2=8."},
+    {q_en:"Angles on a straight line add up to?", q_bm:"Sudut pada garis lurus berjumlah?", choices:["90°","180°","270°","360°"], answer:"180°", explain_en:"Any straight line forms an angle of 180°.", explain_bm:"Mana-mana garis lurus membentuk sudut 180°."},
+    {q_en:"Simplify the ratio 15:20", q_bm:"Permudahkan nisbah 15:20", choices:["3:4","5:4","3:5","4:5"], answer:"3:4", explain_en:"Divide both sides by 5: 15:20 becomes 3:4.", explain_bm:"Bahagikan kedua-dua belah dengan 5: 15:20 menjadi 3:4."},
+    {q_en:"12 × 12 − 44 = ?", q_bm:"12 × 12 − 44 = ?", choices:["90","100","110","120"], answer:"100", explain_en:"12×12=144, then 144−44=100.", explain_bm:"12×12=144, kemudian 144−44=100."},
+  ],
+};
+
+/* ============================================================
+   IQ CHALLENGE — 20 bilingual logic/pattern/reasoning questions.
+   For fun only — not a validated psychometric IQ test.
+============================================================ */
+const IQ_BANK = [
+  {q_en:"2, 4, 6, 8, ?", q_bm:"2, 4, 6, 8, ?", choices:["9","10","11","12"], answer:"10", explain_en:"Each number increases by 2 — this is the even number sequence.", explain_bm:"Setiap nombor bertambah 2 — ini ialah turutan nombor genap."},
+  {q_en:"3, 6, 9, 12, ?", q_bm:"3, 6, 9, 12, ?", choices:["13","14","15","16"], answer:"15", explain_en:"Each number increases by 3 — these are multiples of 3.", explain_bm:"Setiap nombor bertambah 3 — ini ialah gandaan 3."},
+  {q_en:"Which one is different: Apple, Banana, Carrot, Mango?", q_bm:"Yang manakah berbeza: Epal, Pisang, Lobak, Mangga?", choices:["Apple / Epal","Banana / Pisang","Carrot / Lobak","Mango / Mangga"], answer:"Carrot / Lobak", explain_en:"Apple, banana, and mango are fruits — a carrot is a vegetable.", explain_bm:"Epal, pisang, dan mangga ialah buah-buahan — lobak ialah sayur-sayuran."},
+  {q_en:"Bird is to Sky as Fish is to ___?", q_bm:"Burung dengan Langit, sama seperti Ikan dengan ___?", choices:["Water / Air","Tree / Pokok","Sand / Pasir","Grass / Rumput"], answer:"Water / Air", explain_en:"A bird lives and moves in the sky, just like a fish lives and moves in water.", explain_bm:"Burung hidup dan bergerak di langit, sama seperti ikan hidup dan bergerak di dalam air."},
+  {q_en:"Circle, Square, Circle, Square, ?", q_bm:"Bulatan, Segi Empat Sama, Bulatan, Segi Empat Sama, ?", choices:["Circle / Bulatan","Square / Segi Empat Sama","Triangle / Segi Tiga","Star / Bintang"], answer:"Circle / Bulatan", explain_en:"The pattern alternates: circle, square, circle, square — so a circle comes next.", explain_bm:"Corak berselang-seli: bulatan, segi empat sama — jadi bulatan seterusnya."},
+  {q_en:"A, C, E, G, ?", q_bm:"A, C, E, G, ?", choices:["H","I","J","K"], answer:"I", explain_en:"The pattern skips one letter each time: A, C, E, G, I.", explain_bm:"Corak melangkau satu huruf setiap kali: A, C, E, G, I."},
+  {q_en:"Which does not belong: Dog, Cat, Fish, Chair?", q_bm:"Yang manakah tidak sepadan: Anjing, Kucing, Ikan, Kerusi?", choices:["Dog / Anjing","Cat / Kucing","Fish / Ikan","Chair / Kerusi"], answer:"Chair / Kerusi", explain_en:"Dog, cat, and fish are all animals — a chair is furniture.", explain_bm:"Anjing, kucing, dan ikan semuanya haiwan — kerusi ialah perabot."},
+  {q_en:"All cats are animals. Whiskers is a cat. Is Whiskers an animal?", q_bm:"Semua kucing ialah haiwan. Whiskers ialah seekor kucing. Adakah Whiskers seekor haiwan?", choices:["Yes / Ya","No / Tidak","Maybe / Mungkin","Not enough info / Maklumat tidak cukup"], answer:"Yes / Ya", explain_en:"If all cats are animals, and Whiskers is a cat, then Whiskers must be an animal too.", explain_bm:"Jika semua kucing ialah haiwan, dan Whiskers seekor kucing, maka Whiskers juga pasti haiwan."},
+  {q_en:"1, 2, 4, 8, ?", q_bm:"1, 2, 4, 8, ?", choices:["10","12","14","16"], answer:"16", explain_en:"Each number doubles: 1, 2, 4, 8, 16.", explain_bm:"Setiap nombor menjadi dua kali ganda: 1, 2, 4, 8, 16."},
+  {q_en:"Doctor is to Hospital as Teacher is to ___?", q_bm:"Doktor dengan Hospital, sama seperti Guru dengan ___?", choices:["School / Sekolah","Shop / Kedai","Farm / Ladang","Kitchen / Dapur"], answer:"School / Sekolah", explain_en:"A doctor works in a hospital, just like a teacher works in a school.", explain_bm:"Doktor bekerja di hospital, sama seperti guru bekerja di sekolah."},
+  {q_en:"Which shape has no straight sides?", q_bm:"Bentuk manakah tiada sisi lurus?", choices:["Circle / Bulatan","Square / Segi Empat Sama","Triangle / Segi Tiga","Rectangle / Segi Empat Tepat"], answer:"Circle / Bulatan", explain_en:"A circle is made of one curved line, with no straight sides at all.", explain_bm:"Bulatan dibentuk oleh satu garis melengkung, tiada sisi lurus langsung."},
+  {q_en:"5, 10, 20, 40, ?", q_bm:"5, 10, 20, 40, ?", choices:["60","70","80","90"], answer:"80", explain_en:"Each number doubles: 5, 10, 20, 40, 80.", explain_bm:"Setiap nombor menjadi dua kali ganda: 5, 10, 20, 40, 80."},
+  {q_en:"Which is not a mode of transport: Car, Bicycle, Airplane, Table?", q_bm:"Yang manakah bukan pengangkutan: Kereta, Basikal, Kapal Terbang, Meja?", choices:["Car / Kereta","Bicycle / Basikal","Airplane / Kapal Terbang","Table / Meja"], answer:"Table / Meja", explain_en:"A car, bicycle, and airplane all carry people from place to place — a table doesn't move.", explain_bm:"Kereta, basikal, dan kapal terbang semuanya membawa orang — meja tidak bergerak."},
+  {q_en:"If today is Monday, what day will it be in 3 days?", q_bm:"Jika hari ini Isnin, hari apakah selepas 3 hari?", choices:["Wednesday / Rabu","Thursday / Khamis","Friday / Jumaat","Saturday / Sabtu"], answer:"Thursday / Khamis", explain_en:"Monday + 3 days: Tuesday, Wednesday, Thursday. So it will be Thursday.", explain_bm:"Isnin + 3 hari: Selasa, Rabu, Khamis. Jadi ia akan menjadi hari Khamis."},
+  {q_en:"🔺🔺🔵 🔺🔺🔵 🔺🔺 ?", q_bm:"🔺🔺🔵 🔺🔺🔵 🔺🔺 ?", choices:["🔺","🔵","🟨","⬛"], answer:"🔵", explain_en:"The pattern repeats every 3 symbols: triangle, triangle, circle. After two triangles comes a circle.", explain_bm:"Corak berulang setiap 3 simbol: segi tiga, segi tiga, bulatan. Selepas dua segi tiga datang bulatan."},
+  {q_en:"50, 45, 40, 35, ?", q_bm:"50, 45, 40, 35, ?", choices:["25","30","32","34"], answer:"30", explain_en:"Each number decreases by 5: 50, 45, 40, 35, 30.", explain_bm:"Setiap nombor berkurang 5: 50, 45, 40, 35, 30."},
+  {q_en:"Puppy is to Dog as Kitten is to ___?", q_bm:"Anak Anjing dengan Anjing, sama seperti Anak Kucing dengan ___?", choices:["Cat / Kucing","Bird / Burung","Cow / Lembu","Rabbit / Arnab"], answer:"Cat / Kucing", explain_en:"A puppy grows into a dog, just like a kitten grows into a cat.", explain_bm:"Anak anjing membesar menjadi anjing, sama seperti anak kucing membesar menjadi kucing."},
+  {q_en:"Which is NOT an even number: 12, 18, 7, 24?", q_bm:"Yang manakah BUKAN nombor genap: 12, 18, 7, 24?", choices:["12","18","7","24"], answer:"7", explain_en:"Even numbers end in 0,2,4,6,8. 7 is odd, so it doesn't belong.", explain_bm:"Nombor genap berakhir dengan 0,2,4,6,8. 7 ialah ganjil, jadi ia tidak sepadan."},
+  {q_en:"If a triangle has 3 sides, how many sides do two triangles have altogether?", q_bm:"Jika segi tiga mempunyai 3 sisi, berapakah jumlah sisi bagi dua segi tiga?", choices:["4","5","6","9"], answer:"6", explain_en:"One triangle has 3 sides, so two triangles have 3+3 = 6 sides altogether.", explain_bm:"Satu segi tiga mempunyai 3 sisi, jadi dua segi tiga mempunyai 3+3 = 6 sisi kesemuanya."},
+  {q_en:"Sarah is older than Mia. Mia is older than Ali. Who is the youngest?", q_bm:"Sarah lebih tua daripada Mia. Mia lebih tua daripada Ali. Siapakah paling muda?", choices:["Sarah","Mia","Ali","Cannot tell / Tidak dapat ditentukan"], answer:"Ali", explain_en:"Sarah > Mia > Ali in age, so Ali is the youngest of the three.", explain_bm:"Sarah > Mia > Ali mengikut umur, jadi Ali yang paling muda antara ketiga-tiga."},
+];
+
+/* ============================================================
+   STATE
+============================================================ */
+let state = {
+  nickname: '', grade: null, mode: null,
+  quiz: [], qIndex: 0, score: 0, points: 0, answered: false,
+  timerHandle: null, timeLeft: QUESTION_TIME,
+  myWaitingPath: null, myWaitingSha: null, myWaitingName: null,
+  lobbyPollHandle: null,
+  roomGroup: null,
+};
+
+const MASCOT_CORRECT = [
+  {en:"Great job!", bm:"Syabas!"}, {en:"You got it!", bm:"Betul!"},
+  {en:"That's correct!", bm:"Itu betul!"}, {en:"Nice one, keep going!", bm:"Bagus, teruskan!"},
+];
+const MASCOT_WRONG = [
+  {en:"Not quite — here's the answer, and why.", bm:"Belum tepat — ini jawapannya, dan sebabnya."},
+  {en:"Almost! Let's learn this one.", bm:"Hampir! Mari kita belajar soalan ini."},
+  {en:"No worries, here's the trick.", bm:"Jangan risau, ini caranya."},
+];
+
+function $(id){return document.getElementById(id);}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+function gradeInfo(key){ return GRADES.find(g=>g.key===key); }
+function pickRandom(arr,n){
+  const copy=[...arr]; const out=[];
+  while(out.length<n && copy.length){ const i=Math.floor(Math.random()*copy.length); out.push(copy.splice(i,1)[0]); }
+  return out;
+}
+function banner(msg, cls, timeoutMs){
+  const b=$('status-banner');
+  b.textContent=msg;
+  b.className='status-banner show'+(cls?(' '+cls):'');
+  if(timeoutMs){ setTimeout(()=>b.classList.remove('show'), timeoutMs); }
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&lt;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]||c)); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function fnv1a(str){ let h=0x811c9dc5; for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,0x01000193);} return h>>>0; }
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function seededPickRandom(arr, n, seedStr){
+  const rand = mulberry32(fnv1a(seedStr));
+  const copy=[...arr]; const out=[];
+  while(out.length<n && copy.length){ const i=Math.floor(rand()*copy.length); out.push(copy.splice(i,1)[0]); }
+  return out;
+}
+
+function buildGradeGrid(){
+  const grid=$('grade-grid'); grid.innerHTML='';
+  GRADES.forEach(g=>{
+    const btn=document.createElement('button');
+    btn.className='grade-btn'; btn.style.setProperty('--sel', g.color);
+    btn.innerHTML=`<div class="g-num">${g.label}</div><div class="g-my">${g.my}</div>`;
+    btn.onclick=()=>{ document.querySelectorAll('.grade-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); state.grade=g.key; };
+    grid.appendChild(btn);
+  });
+}
+function buildSelect(id){
+  const sel=$(id); sel.innerHTML='';
+  GRADES.forEach(g=>{ const opt=document.createElement('option'); opt.value=g.key; opt.textContent=`${g.label} (${g.my})`; sel.appendChild(opt); });
+}
+buildGradeGrid();
+buildSelect('leader-grade-select');
+buildSelect('tools-grade-select');
+buildSelect('danger-grade-select');
+
+/* ============================================================
+   SYLLABUS TAB
+============================================================ */
+function buildSyllabus(){
+  const tabs=$('syllabus-tabs'); const panels=$('syllabus-panels');
+  tabs.innerHTML=''; panels.innerHTML='';
+  GRADES.forEach((g,i)=>{
+    const btn=document.createElement('button');
+    btn.className='syl-tab-btn'+(i===0?' active':'');
+    btn.style.background = i===0 ? g.color : 'var(--bg2)';
+    btn.style.color = i===0 ? '#fff' : 'var(--ink)';
+    btn.textContent = g.label;
+    btn.onclick=()=>switchSyllabusTab(g.key);
+    btn.dataset.grade=g.key;
+    tabs.appendChild(btn);
+
+    const panel=document.createElement('div');
+    panel.className='syl-panel'+(i===0?' active':'');
+    panel.id='syl-panel-'+g.key;
+
+    const itemsHtml = SYLLABUS[g.key].map((t,idx)=>{
+      const uid = `${g.key}-${idx}`;
+      return `<div class="syl-item" id="syl-item-${uid}">
+        <button class="syl-head" onclick="toggleSylItem('${uid}')">
+          <div class="syl-icon">${t.icon||'📘'}</div>
+          <div class="syl-num">${idx+1}</div>
+          <div class="syl-head-text"><div class="en">${escapeHtml(t.en)}</div><div class="bm">${escapeHtml(t.bm)}</div></div>
+          <div class="syl-chevron">▾</div>
+        </button>
+        <div class="syl-body"><div class="syl-body-inner">
+          <div class="syl-note"><div class="en">${escapeHtml(t.explain_en)}</div><div class="bm">${escapeHtml(t.explain_bm)}</div></div>
+          <div class="syl-example">
+            <div class="tag">Example ／ Contoh</div>
+            <div class="en">${escapeHtml(t.example_en)}</div>
+            <div class="bm">${escapeHtml(t.example_bm)}</div>
+          </div>
+          <div class="syl-check">
+            <div class="syl-check-q"><div class="en">💭 ${escapeHtml(t.check_q_en)}</div><div class="bm">${escapeHtml(t.check_q_bm)}</div></div>
+            <button class="syl-check-btn" onclick="revealSylAnswer(this)">Show answer ／ Tunjuk Jawapan</button>
+            <span class="syl-check-answer">✅ ${escapeHtml(t.check_a)}</span>
+          </div>
+        </div></div>
+      </div>`;
+    }).join('');
+
+    panel.innerHTML = `<div class="syl-controls">
+        <button class="btn secondary small" onclick="setAllSyl('${g.key}',true)">Expand all ／ Kembang Semua</button>
+        <button class="btn secondary small" onclick="setAllSyl('${g.key}',false)">Collapse all ／ Kuncup Semua</button>
+      </div>
+      <div class="syl-progress">${g.label} (${g.my}) · ${SYLLABUS[g.key].length} topics ／ topik</div>
+      ${itemsHtml}`;
+    panels.appendChild(panel);
+  });
+}
+function switchSyllabusTab(gradeKey){
+  document.querySelectorAll('.syl-tab-btn').forEach(b=>{
+    const active = b.dataset.grade===gradeKey;
+    b.classList.toggle('active', active);
+    b.style.background = active ? gradeInfo(gradeKey).color : 'var(--bg2)';
+    b.style.color = active ? '#fff' : 'var(--ink)';
+  });
+  document.querySelectorAll('.syl-panel').forEach(p=>p.classList.toggle('active', p.id==='syl-panel-'+gradeKey));
+}
+function toggleSylItem(uid){
+  const el = $('syl-item-'+uid);
+  if(el) el.classList.toggle('open');
+}
+function setAllSyl(gradeKey, open){
+  document.querySelectorAll(`#syl-panel-${gradeKey} .syl-item`).forEach(el=>el.classList.toggle('open', open));
+}
+function revealSylAnswer(btn){
+  btn.style.display='none';
+  const answer = btn.nextElementSibling;
+  if(answer) answer.style.display='inline-block';
+}
+buildSyllabus();
+
+/* ============================================================
+   ADMIN PASSWORD GATE
+============================================================ */
+function openAdminGate(){
+  $('admin-pw-input').value='';
+  $('admin-pw-error').style.display='none';
+  showScreen('screen-admin-gate');
+  setTimeout(()=>$('admin-pw-input').focus(), 50);
+}
+function checkAdminPassword(){
+  if($('admin-pw-input').value===ADMIN_PASSWORD){
+    fillConfigForm();
+    refreshConnectionDot();
+    showScreen('screen-admin');
+    switchAdminTab('connections');
+  } else {
+    $('admin-pw-error').style.display='block';
+  }
+}
+
+/* ============================================================
+   CONFIG — GitHub only, localStorage
+============================================================ */
+function loadGithubConfig(){
+  return { owner: localStorage.getItem('kk_owner')||'', repo: localStorage.getItem('kk_repo')||'',
+    branch: localStorage.getItem('kk_branch')||'main', token: localStorage.getItem('kk_token')||'' };
+}
+function fillConfigForm(){
+  const g=loadGithubConfig();
+  $('cfg-owner').value=g.owner; $('cfg-repo').value=g.repo; $('cfg-branch').value=g.branch||'main'; $('cfg-token').value=g.token;
+}
+
+function toggleTokenGuide(){
+  const el = $('token-guide');
+  el.style.display = (el.style.display==='none') ? 'block' : 'none';
+}
+function switchAdminTab(tab){
+  document.querySelectorAll('.admin-tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
+  $('admin-'+tab).classList.add('active');
+  if(tab==='live'){ startAdminLiveView(); } else { stopAdminLiveView(); }
+}
+
+async function saveGithubConfig(){
+  localStorage.setItem('kk_owner', $('cfg-owner').value.trim());
+  localStorage.setItem('kk_repo', $('cfg-repo').value.trim());
+  localStorage.setItem('kk_branch', $('cfg-branch').value.trim()||'main');
+  localStorage.setItem('kk_token', $('cfg-token').value.trim());
+  await testGithub();
+  if(loadGithubConfig().owner){ loadLeaderboard(); loadIQLeaderboardPreview(); }
+}
+async function testGithub(){
+  $('cfg-test-result').textContent='Testing… ／ Menguji…';
+  const c=loadGithubConfig();
+  try{
+    const res=await fetch(`https://api.github.com/repos/${c.owner}/${c.repo}`, {headers: ghHeaders()});
+    const ok=res.ok;
+    $('cfg-test-result').textContent = ok ? '✅ Connected. ／ Berjaya disambung.' : '⚠️ Could not access repo. ／ Tidak dapat mengakses repo.';
+    $('dot-github').classList.toggle('ok', ok); $('dot-github').classList.toggle('bad', !ok);
+  }catch(e){
+    $('cfg-test-result').textContent='⚠️ Network error reaching GitHub.';
+    $('dot-github').classList.add('bad');
+  }
+}
+function refreshConnectionDot(){
+  const g=loadGithubConfig();
+  $('dot-github').classList.toggle('ok', !!(g.owner && g.repo && g.token));
+}
+
+/* ============================================================
+   GITHUB CONTENTS API HELPERS
+============================================================ */
+function ghHeaders(extra){
+  const c=loadGithubConfig();
+  return Object.assign({ 'Authorization': `token ${c.token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }, extra||{});
+}
+function ghBaseUrl(path){ const c=loadGithubConfig(); return `https://api.github.com/repos/${c.owner}/${c.repo}/contents/${path}`; }
+function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+function b64ToUtf8(b64){ return decodeURIComponent(escape(atob(b64.replace(/\n/g,'')))); }
+
+async function ghGetJson(path){
+  const c=loadGithubConfig();
+  try{
+    const res=await fetch(`${ghBaseUrl(path)}?ref=${encodeURIComponent(c.branch)}&_=${Date.now()}`, {headers: ghHeaders(), cache:'no-store'});
+    if(res.status===404){ return {json:null, sha:null}; }
+    if(!res.ok){ throw new Error('GET failed '+res.status); }
+    const data=await res.json();
+    if(Array.isArray(data)) return {json:data, sha:null};
+    return {json: JSON.parse(b64ToUtf8(data.content)), sha: data.sha};
+  }catch(e){ return {json:null, sha:null, error:e}; }
+}
+
+const etagCache = {};
+async function ghGetConditional(path){
+  const c=loadGithubConfig();
+  const cached = etagCache[path];
+  const headers = ghHeaders(cached && cached.etag ? {'If-None-Match': cached.etag} : {});
+  try{
+    const res=await fetch(`${ghBaseUrl(path)}?ref=${encodeURIComponent(c.branch)}`, {headers});
+    if(res.status===304 && cached){ return {json: cached.json, notModified:true}; }
+    if(res.status===404){ delete etagCache[path]; return {json:null, notModified:false}; }
+    if(!res.ok){ return {json:null, notModified:false, error:true}; }
+    const etag = res.headers.get('ETag');
+    const data = await res.json();
+    const json = Array.isArray(data) ? data : JSON.parse(b64ToUtf8(data.content));
+    etagCache[path] = {etag, json};
+    return {json, notModified:false};
+  }catch(e){ return {json:null, notModified:false, error:e}; }
+}
+
+async function ghPutJson(path, jsonValue, message, sha){
+  const c=loadGithubConfig();
+  const body={ message: message||`update ${path}`, content: utf8ToB64(JSON.stringify(jsonValue, null, 2)), branch: c.branch };
+  if(sha) body.sha=sha;
+  const res=await fetch(ghBaseUrl(path), {method:'PUT', headers: ghHeaders(), body: JSON.stringify(body)});
+  if(!res.ok) return {ok:false};
+  const data=await res.json();
+  return {ok:true, sha: data.content && data.content.sha};
+}
+async function ghDeleteFile(path, sha, message){
+  const c=loadGithubConfig();
+  const res=await fetch(ghBaseUrl(path), {method:'DELETE', headers: ghHeaders(), body: JSON.stringify({message: message||`delete ${path}`, sha, branch: c.branch})});
+  return res.ok;
+}
+
+function scorePath(grade, nickname, ts){
+  const safe = String(nickname).replace(/[^a-zA-Z0-9-]/g,'').slice(0,20) || 'player';
+  return `data/leaderboard/${grade}/${ts}_${safe}.json`;
+}
+function indexPath(grade){ return `data/leaderboard-index/${grade}.json`; }
+function waitingDirPath(grade){ return `data/lobby/${grade}/waiting`; }
+function waitingFileName(nickname){
+  const safe = String(nickname).replace(/[^a-zA-Z0-9-]/g,'').slice(0,20) || 'player';
+  const ts = Date.now();
+  const rand = Math.random().toString(36).slice(2,7);
+  return `${ts}_${safe}_${rand}.json`;
+}
+function parseWaitingName(name){
+  const base = name.replace(/\.json$/,'');
+  const parts = base.split('_');
+  return { ts: parseInt(parts[0],10), nickname: parts[1]||'player' };
+}
+
+/* ============================================================
+   HOME ACTIONS
+============================================================ */
+function readNickname(){ return $('nickname-input').value.trim(); }
+function validateGithubOrWarn(){
+  const c=loadGithubConfig();
+  if(!c.owner || !c.repo || !c.token){ banner('⚠️ Connect GitHub in ⚙️ Admin first. ／ Sambung GitHub dalam ⚙️ Pentadbir dahulu.', 'err', 6000); return false; }
+  return true;
+}
+
+function startPractice(){
+  state.nickname = readNickname();
+  if(!state.nickname){ alert('Please enter a nickname. ／ Sila masukkan nama.'); return; }
+  if(!state.grade){ alert('Please choose a grade. ／ Sila pilih tahun.'); return; }
+  state.mode='practice'; state.roomGroup=null;
+  beginQuiz(pickRandom(BANK[state.grade], Math.min(QUIZ_LENGTH, BANK[state.grade].length)));
+}
+
+function startIQChallenge(){
+  state.nickname = readNickname();
+  if(!state.nickname){ alert('Please enter a nickname. ／ Sila masukkan nama.'); return; }
+  state.mode='iq'; state.grade='iq'; state.roomGroup=null;
+  beginQuiz(pickRandom(IQ_BANK, IQ_BANK.length)); // shuffle order, use all 20
+}
+
+async function joinCompetition(){
+  state.nickname = readNickname();
+  if(!state.nickname){ alert('Please enter a nickname. ／ Sila masukkan nama.'); return; }
+  if(!state.grade){ alert('Please choose a grade. ／ Sila pilih tahun.'); return; }
+  if(!validateGithubOrWarn()) return;
+  state.mode='competition';
+  showScreen('screen-lobby');
+  $('lobby-grade-label').textContent = `Grade: ${gradeInfo(state.grade).label} (${gradeInfo(state.grade).my})`;
+  buildFlowerMeter(0);
+  await enterLobby();
+}
+
+function buildFlowerMeter(filled){
+  const wrap=$('flower-meter'); wrap.innerHTML='';
+  for(let i=0;i<LOBBY_SIZE;i++){
+    const f=document.createElement('div'); f.className='flower'+(i<filled?' filled':'');
+    f.innerHTML=`<svg viewBox="0 0 40 40"><g>
+      <circle cx="20" cy="10" r="7" fill="#E94F64"/><circle cx="30" cy="20" r="7" fill="#E94F64"/>
+      <circle cx="20" cy="30" r="7" fill="#E94F64"/><circle cx="10" cy="20" r="7" fill="#E94F64"/>
+      <circle cx="20" cy="20" r="6" fill="#F4A300"/></g></svg>`;
+    wrap.appendChild(f);
+  }
+}
+
+async function enterLobby(){
+  const fname = waitingFileName(state.nickname);
+  const path = `${waitingDirPath(state.grade)}/${fname}`;
+  const {ok, sha} = await ghPutJson(path, { nickname: state.nickname, joinedAt: Date.now() }, `join lobby: ${state.nickname}`);
+  if(!ok){ banner('⚠️ Could not join the lobby — check GitHub connection. ／ Tidak dapat menyertai bilik.', 'err', 6000); showScreen('screen-home'); return; }
+  state.myWaitingPath = path; state.myWaitingSha = sha; state.myWaitingName = fname;
+  await pollLobby();
+  state.lobbyPollHandle = setInterval(pollLobby, LOBBY_POLL_MS);
+}
+
+async function pollLobby(){
+  const {json: listing} = await ghGetConditional(waitingDirPath(state.grade));
+  if(!Array.isArray(listing)) return;
+  const sorted = listing.map(f=>{
+    const parsed = parseWaitingName(f.name);
+    return { name: f.name, sha: f.sha, ts: parsed.ts, nickname: parsed.nickname };
+  }).sort((a,b)=>a.ts-b.ts);
+
+  const idx = sorted.findIndex(e=>e.name===state.myWaitingName);
+  $('lobby-total').textContent = `${sorted.length} total waiting ・ ${sorted.length} jumlah menunggu`;
+
+  if(idx===-1){
+    $('lobby-count').textContent = `Joining… ／ Menyertai…`;
+    return;
+  }
+  const roomStart = Math.floor(idx/LOBBY_SIZE)*LOBBY_SIZE;
+  const group = sorted.slice(roomStart, roomStart+LOBBY_SIZE);
+  buildFlowerMeter(group.length);
+  $('lobby-count').textContent = `${group.length} / ${LOBBY_SIZE} in your room`;
+  const list=$('lobby-list'); list.innerHTML='';
+  group.forEach(p=>{
+    const c=document.createElement('div'); c.className='chip';
+    c.textContent = p.nickname===state.nickname ? `${p.nickname} (you)` : p.nickname;
+    list.appendChild(c);
+  });
+
+  if(group.length===LOBBY_SIZE){
+    clearInterval(state.lobbyPollHandle);
+    await formRoom(group);
+  }
+}
+
+async function formRoom(group){
+  state.roomGroup = group;
+  const lastPath = `${waitingDirPath(state.grade)}/${group[group.length-1].name}`;
+  const {json: lastContent} = await ghGetJson(lastPath);
+  const anchorTs = (lastContent && lastContent.joinedAt) || group[group.length-1].ts;
+  const startAt = anchorTs + COUNTDOWN_MS;
+
+  const seedStr = state.grade + '|' + group.map(g=>g.name).join('|');
+  const quiz = seededPickRandom(BANK[state.grade], Math.min(QUIZ_LENGTH, BANK[state.grade].length), seedStr);
+
+  if(state.myWaitingPath && state.myWaitingSha){
+    ghDeleteFile(state.myWaitingPath, state.myWaitingSha, `leave lobby (matched): ${state.nickname}`).catch(()=>{});
+  }
+  enterCountdown(startAt, quiz);
+}
+
+function leaveLobby(){
+  if(state.lobbyPollHandle){ clearInterval(state.lobbyPollHandle); state.lobbyPollHandle=null; }
+  if(state.myWaitingPath && state.myWaitingSha){
+    ghDeleteFile(state.myWaitingPath, state.myWaitingSha, `leave lobby: ${state.nickname}`).catch(()=>{});
+  }
+  state.myWaitingPath=null; state.myWaitingSha=null;
+  showScreen('screen-home');
+}
+
+function enterCountdown(startAt, quiz){
+  showScreen('screen-countdown');
+  const tick=()=>{
+    const secs = Math.max(0, Math.ceil((startAt - Date.now())/1000));
+    $('countdown-num').textContent = secs;
+    if(secs<=0){ clearInterval(cdHandle); beginQuiz(quiz); }
+  };
+  tick();
+  const cdHandle=setInterval(tick, 250);
+}
+
+/* ============================================================
+   QUIZ ENGINE
+============================================================ */
+function beginQuiz(questionSet){
+  state.quiz = questionSet; state.qIndex=0; state.score=0; state.points=0;
+  showScreen('screen-quiz'); renderQuestion();
+}
+
+function renderQuestion(){
+  state.answered=false;
+  const total=state.quiz.length; const q=state.quiz[state.qIndex];
+  $('q-tag').textContent=`Question ${state.qIndex+1}/${total} ・ Soalan ${state.qIndex+1}/${total}`;
+  $('q-progress').style.width=`${(state.qIndex/total)*100}%`;
+  $('q-text-en').textContent=q.q_en;
+  $('q-text-bm').textContent=q.q_bm;
+  $('q-feedback').className='feedback'; $('q-feedback').innerHTML='';
+  $('q-next-btn').style.display='none';
+
+  const box=$('q-choices'); box.innerHTML='';
+  q.choices.forEach(choice=>{
+    const btn=document.createElement('button'); btn.className='choice'; btn.textContent=choice;
+    btn.onclick=()=>selectAnswer(choice, btn);
+    box.appendChild(btn);
+  });
+
+  state.timeLeft=QUESTION_TIME; $('q-timer').textContent=`⏱ ${state.timeLeft}`;
+  clearInterval(state.timerHandle);
+  state.timerHandle=setInterval(()=>{
+    state.timeLeft--; $('q-timer').textContent=`⏱ ${Math.max(0,state.timeLeft)}`;
+    if(state.timeLeft<=0){ clearInterval(state.timerHandle); if(!state.answered) selectAnswer(null,null); }
+  },1000);
+}
+
+function selectAnswer(choice, btnEl){
+  if(state.answered) return;
+  state.answered=true; clearInterval(state.timerHandle);
+  const q=state.quiz[state.qIndex];
+  document.querySelectorAll('#q-choices .choice').forEach(b=>{
+    b.classList.add('disabled'); if(b.textContent===q.answer) b.classList.add('correct');
+  });
+  const isCorrect = choice===q.answer;
+  if(!isCorrect && btnEl) btnEl.classList.add('wrong');
+
+  const fb=$('q-feedback');
+  if(isCorrect){
+    state.score++;
+    const speedBonus=Math.max(0,state.timeLeft)*2;
+    state.points += 10+speedBonus;
+    const m = pick(MASCOT_CORRECT);
+    fb.className='feedback show good';
+    fb.innerHTML = `<div class="en">✅ ${m.en} +${10+speedBonus} pts</div><div class="bm">${m.bm} +${10+speedBonus} mata</div>`;
+  } else {
+    fb.className='feedback show bad';
+    const m = pick(MASCOT_WRONG);
+    const reasonEn = choice===null ? "Time's up! " : '';
+    const reasonBm = choice===null ? "Masa tamat! " : '';
+    fb.innerHTML = `<div class="en">❌ ${reasonEn}${m.en} The correct answer is "${escapeHtml(q.answer)}". ${escapeHtml(q.explain_en)}</div>` +
+                   `<div class="bm">${reasonBm}${m.bm} Jawapan betul ialah "${escapeHtml(q.answer)}". ${escapeHtml(q.explain_bm)}</div>`;
+  }
+  $('q-next-btn').style.display='block';
+  const isLast = state.qIndex+1>=state.quiz.length;
+  $('q-next-btn').innerHTML = isLast ? 'See results ➜<span class="bm">Lihat Keputusan</span>' : 'Next ➜<span class="bm">Seterusnya</span>';
+}
+
+function nextQuestion(){
+  state.qIndex++;
+  if(state.qIndex>=state.quiz.length) finishQuiz(); else renderQuestion();
+}
+
+async function finishQuiz(){
+  showScreen('screen-results');
+  $('result-score').textContent=`${state.score}/${state.quiz.length}`;
+  $('result-points').textContent=state.points;
+  const ratio=state.score/state.quiz.length;
+
+  if(state.mode==='iq'){
+    const iqScore = Math.max(55, Math.min(145, 100 + (state.score-10)*3));
+    $('iq-score-num').textContent = iqScore;
+    $('iq-score-badge').style.display='block';
+    const msg = ratio===1 ? {en:"Outstanding! Every question solved! 🧠", bm:"Cemerlang! Semua soalan diselesaikan! 🧠"} :
+      ratio>=0.7 ? {en:"Sharp thinking! Great reasoning skills!", bm:"Pemikiran yang tajam! Kemahiran menaakul yang bagus!"} :
+      ratio>=0.4 ? {en:"Good effort! Logic puzzles take practice.", bm:"Usaha yang baik! Teka-teki logik perlukan latihan."} :
+      {en:"Nice try! Every attempt sharpens your mind.", bm:"Percubaan yang baik! Setiap percubaan mengasah minda."};
+    $('result-mascot-speech').innerHTML = `<div class="en">${msg.en}</div><div class="bm">${msg.bm}</div>`;
+    $('result-leaderboard-title').innerHTML = `🧠 IQ Leaderboard<span class="bm">Papan Pendahulu IQ</span>`;
+  } else {
+    $('iq-score-badge').style.display='none';
+    const msg = ratio===1 ? {en:"Perfect score! You're a maths champion! 🏆", bm:"Markah sempurna! Anda juara matematik! 🏆"} :
+      ratio>=0.7 ? {en:"Great work! Kancil is proud of you!", bm:"Kerja yang bagus! Kancil bangga dengan anda!"} :
+      ratio>=0.4 ? {en:"Good try! Practice makes perfect.", bm:"Cubaan yang baik! Amalan menjadikan sempurna."} :
+      {en:"Keep practicing — you'll get better every time!", bm:"Teruskan berlatih — anda akan bertambah baik setiap kali!"};
+    $('result-mascot-speech').innerHTML = `<div class="en">${msg.en}</div><div class="bm">${msg.bm}</div>`;
+    $('result-leaderboard-title').innerHTML = `🏅 All-time leaderboard<span class="bm">Papan Pendahulu Sepanjang Masa</span>`;
+  }
+
+  $('room-results-card').style.display = (state.mode==='competition' && state.roomGroup) ? 'block' : 'none';
+
+  if(validateGithubOrWarn()){ await submitScoreToGithub(); }
+  if(state.mode==='competition' && state.roomGroup){ await refreshRoomResults(); }
+  await renderResultLeaderboard();
+  if(state.mode==='iq'){ loadIQLeaderboardPreview(); }
+}
+
+async function submitScoreToGithub(){
+  const ts = Date.now();
+  const path = scorePath(state.grade, state.nickname, ts);
+  const entry = { nickname: state.nickname, score: state.score, total: state.quiz.length, points: state.points,
+    mode: state.mode, date: new Date().toISOString() };
+  const {ok} = await ghPutJson(path, entry, `score: ${state.nickname} (${state.grade})`);
+  if(!ok) banner('⚠️ Could not save score to GitHub — check Admin connection.', 'err', 6000);
+  return ok;
+}
+
+async function refreshRoomResults(){
+  const box=$('room-results-box');
+  box.innerHTML='<p class="helptext">Loading… ／ Memuatkan…</p>';
+  const {json: listing} = await ghGetJson(`data/leaderboard/${state.grade}`);
+  if(!Array.isArray(listing)){ box.innerHTML='<p class="helptext">No data yet. ／ Tiada data lagi.</p>'; return; }
+  const roommates = new Set(state.roomGroup.map(g=>g.nickname));
+  const candidates = listing.filter(f=>{
+    const parts = f.name.replace(/\.json$/,'').split('_');
+    return roommates.has(parts.slice(1).join('_'));
+  }).sort((a,b)=>b.name.localeCompare(a.name)).slice(0, 60);
+  const files = await Promise.all(candidates.map(f=>ghGetJson(f.path)));
+  const latestByPlayer = {};
+  files.forEach(f=>{
+    const e=f.json; if(!e) return;
+    if(!latestByPlayer[e.nickname] || e.date > latestByPlayer[e.nickname].date){ latestByPlayer[e.nickname]=e; }
+  });
+  const rows = Object.values(latestByPlayer).sort((a,b)=>b.points-a.points);
+  if(!rows.length){ box.innerHTML='<p class="helptext">Waiting for players to finish… ／ Menunggu pemain selesai…</p>'; return; }
+  box.innerHTML = rows.map(r=>
+    `<div class="live-row${r.nickname===state.nickname?' me':''}"><span>${escapeHtml(r.nickname)}</span><span>${r.score}/${r.total} · ${r.points} pts</span></div>`
+  ).join('');
+}
+
+async function fetchLeaderboard(grade){
+  const {json: index} = await ghGetJson(indexPath(grade));
+  if(index && Array.isArray(index.top)) return index.top;
+  const {json: listing} = await ghGetJson(`data/leaderboard/${grade}`);
+  if(!Array.isArray(listing) || !listing.length) return [];
+  const recent = listing.sort((a,b)=> b.name.localeCompare(a.name)).slice(0, LEADERBOARD_SCAN_LIMIT);
+  const files = await Promise.all(recent.map(f=>ghGetJson(f.path)));
+  return files.map(f=>f.json).filter(Boolean).sort((a,b)=>b.points-a.points).slice(0,10);
+}
+function leaderboardTableHtml(list){
+  if(!list.length) return '<p class="helptext">No scores yet — be the first! ／ Belum ada markah — jadilah yang pertama!</p>';
+  const top=[...list].sort((a,b)=>b.points-a.points).slice(0,10);
+  const medals=['🥇','🥈','🥉'];
+  const rows=top.map((e,i)=>`<tr><td>${medals[i]||(i+1)}</td><td>${escapeHtml(e.nickname)}</td><td>${e.score}/${e.total}</td><td>${e.points} pts</td></tr>`).join('');
+  return `<table class="leader"><thead><tr><th></th><th>Player ／ Pemain</th><th>Score ／ Markah</th><th>Points ／ Mata</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+async function renderResultLeaderboard(){
+  const box=$('result-leaderboard-box'); box.innerHTML='<p class="helptext">Loading… ／ Memuatkan…</p>';
+  box.innerHTML = leaderboardTableHtml(await fetchLeaderboard(state.grade));
+}
+async function loadLeaderboard(){
+  const g=$('leader-grade-select').value; const box=$('leaderboard-box');
+  if(!loadGithubConfig().owner){ box.innerHTML='<p class="helptext">Connect GitHub in ⚙️ Admin to see leaderboards.</p>'; return; }
+  box.innerHTML='<p class="helptext">Loading… ／ Memuatkan…</p>';
+  box.innerHTML = leaderboardTableHtml(await fetchLeaderboard(g));
+}
+
+async function loadIQLeaderboardPreview(){
+  const box=$('iq-leaderboard-box');
+  if(!box) return;
+  if(!loadGithubConfig().owner){ box.innerHTML='<p class="helptext">Connect GitHub to see the IQ leaderboard. ／ Sambung GitHub untuk lihat papan pendahulu IQ.</p>'; return; }
+  box.innerHTML='<p class="helptext">Loading… ／ Memuatkan…</p>';
+  const list = await fetchLeaderboard('iq');
+  if(!list.length){ box.innerHTML='<p class="helptext">No IQ scores yet — be the first! ／ Belum ada skor IQ — jadilah yang pertama!</p>'; return; }
+  const top5 = [...list].sort((a,b)=>b.points-a.points).slice(0,5);
+  const medals=['🥇','🥈','🥉'];
+  box.innerHTML = top5.map((e,i)=>{
+    const iq = Math.max(55, Math.min(145, 100 + (e.score-10)*3));
+    return `<div class="live-row"><span>${medals[i]||(i+1)} ${escapeHtml(e.nickname)}</span><span>${e.score}/${e.total} · IQ ~${iq}</span></div>`;
+  }).join('');
+}
+
+let adminLiveHandle=null;
+function startAdminLiveView(){
+  if(!validateGithubOrWarn()){ $('admin-live-box').innerHTML='<p class="helptext">Connect GitHub first.</p>'; return; }
+  stopAdminLiveView();
+  const tick=async ()=>{
+    const box=$('admin-live-box');
+    const rows = await Promise.all(GRADES.map(async g=>{
+      const {json: listing} = await ghGetConditional(waitingDirPath(g.key));
+      const count = Array.isArray(listing) ? listing.length : 0;
+      return {g, count};
+    }));
+    box.innerHTML='';
+    rows.forEach(({g,count})=>{
+      const complete = Math.floor(count/LOBBY_SIZE);
+      const partial = count % LOBBY_SIZE;
+      const row=document.createElement('div'); row.className='grade-live-row';
+      row.innerHTML=`<span class="gname">${g.label}</span><span class="gcounts">${count} waiting · ${complete} formed · ${partial} filling</span>`;
+      box.appendChild(row);
+    });
+  };
+  tick();
+  adminLiveHandle = setInterval(tick, 5000);
+}
+function stopAdminLiveView(){ if(adminLiveHandle){ clearInterval(adminLiveHandle); adminLiveHandle=null; } }
+
+async function rebuildIndex(){
+  const grade=$('tools-grade-select').value;
+  $('tools-rebuild-result').textContent='Scanning score files…';
+  const {json: listing} = await ghGetJson(`data/leaderboard/${grade}`);
+  if(!Array.isArray(listing)){ $('tools-rebuild-result').textContent='No score files found yet for this grade.'; return; }
+  const batchSize=15; let all=[];
+  for(let i=0;i<listing.length;i+=batchSize){
+    const batch = listing.slice(i,i+batchSize);
+    const results = await Promise.all(batch.map(f=>ghGetJson(f.path)));
+    all = all.concat(results.map(r=>r.json).filter(Boolean));
+    $('tools-rebuild-result').textContent = `Scanned ${Math.min(i+batchSize, listing.length)} / ${listing.length} files…`;
+  }
+  const top = all.sort((a,b)=>b.points-a.points).slice(0,50);
+  const {sha: existingSha} = await ghGetJson(indexPath(grade));
+  const {ok} = await ghPutJson(indexPath(grade), {top, rebuiltAt: new Date().toISOString(), scannedFiles: listing.length}, `rebuild index: ${grade}`, existingSha);
+  $('tools-rebuild-result').textContent = ok ? `✅ Index rebuilt from ${listing.length} files.` : '⚠️ Failed to write index — check GitHub connection.';
+}
+
+async function clearLobby(){
+  const grade=$('danger-grade-select').value;
+  if(!confirm(`Delete every waiting-room file for ${gradeInfo(grade).label}? Saved scores are not affected.`)) return;
+  const {json: listing} = await ghGetJson(waitingDirPath(grade));
+  if(!Array.isArray(listing) || !listing.length){ $('danger-clear-result').textContent='Nothing to clear.'; return; }
+  $('danger-clear-result').textContent = `Deleting ${listing.length} file(s)…`;
+  let done=0;
+  for(const f of listing){
+    await ghDeleteFile(f.path, f.sha, `admin clear lobby: ${grade}`).catch(()=>{});
+    done++;
+    $('danger-clear-result').textContent = `Deleting… ${done}/${listing.length}`;
+  }
+  delete etagCache[waitingDirPath(grade)];
+  $('danger-clear-result').textContent = `✅ Cleared ${done} file(s).`;
+}
+
+function backToHome(){
+  $('nickname-input').value='';
+  document.querySelectorAll('.grade-btn').forEach(b=>b.classList.remove('selected'));
+  state = {...state, grade:null, mode:null, quiz:[], qIndex:0, score:0, points:0, roomGroup:null, myWaitingPath:null, myWaitingSha:null};
+  showScreen('screen-home');
+}
+
+fillConfigForm();
+if(loadGithubConfig().owner){ loadLeaderboard(); loadIQLeaderboardPreview(); }
+</script>
+</body>
+</html>
