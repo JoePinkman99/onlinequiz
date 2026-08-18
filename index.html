@@ -317,6 +317,7 @@
     </div>
     <div class="card">
       <h2 class="section-title" style="font-size:16px;" id="result-leaderboard-title">🏅 All-time leaderboard<span class="bm">Papan Pendahulu Sepanjang Masa</span></h2>
+      <button class="btn secondary small" style="margin:8px 0 10px;" onclick="renderResultLeaderboard()">🔄 Refresh ／ Segarkan</button>
       <div id="result-leaderboard-box"></div>
     </div>
   </div>
@@ -1035,16 +1036,39 @@ async function saveGithubConfig(){
   if(loadGithubConfig().owner){ loadLeaderboard(); loadIQLeaderboardPreview(); }
 }
 async function testGithub(){
-  $('cfg-test-result').textContent='Testing… ／ Menguji…';
+  $('cfg-test-result').innerHTML='Testing… ／ Menguji…';
   const c=loadGithubConfig();
+  if(!c.owner || !c.repo || !c.token){
+    $('cfg-test-result').innerHTML='⚠️ Fill in all fields first. ／ Isikan semua ruangan dahulu.';
+    $('dot-github').classList.add('bad'); $('dot-github').classList.remove('ok');
+    return;
+  }
   try{
-    const res=await fetch(`https://api.github.com/repos/${c.owner}/${c.repo}`, {headers: ghHeaders()});
-    const ok=res.ok;
-    $('cfg-test-result').textContent = ok ? '✅ Connected. ／ Berjaya disambung.' : '⚠️ Could not access repo. ／ Tidak dapat mengakses repo.';
-    $('dot-github').classList.toggle('ok', ok); $('dot-github').classList.toggle('bad', !ok);
+    // Step 1: can we even see the repo?
+    const readRes = await fetch(`https://api.github.com/repos/${c.owner}/${c.repo}`, {headers: ghHeaders()});
+    if(!readRes.ok){
+      const reason = readRes.status===404 ? 'Repo not found — check the owner and repo name are exactly right.'
+        : readRes.status===401 ? 'Token is invalid or expired.'
+        : `GitHub returned an error (${readRes.status}).`;
+      $('cfg-test-result').innerHTML = `⚠️ Can't reach the repo. ${reason}<br><i>Tidak dapat mengakses repo. Semak nama pemilik dan repo, atau token.</i>`;
+      $('dot-github').classList.add('bad'); $('dot-github').classList.remove('ok');
+      return;
+    }
+    // Step 2: can we actually write? This is what the app needs for scores/lobby to work.
+    const testPath = 'data/_connection_test.json';
+    const writeResult = await ghPutJson(testPath, {ok:true, testedAt: new Date().toISOString()}, 'connection test (safe to delete)');
+    if(!writeResult.ok){
+      $('cfg-test-result').innerHTML = `⚠️ Repo found, but the token can't write to it. Go back to the token settings on GitHub and make sure <b>Contents</b> is set to <b>Read and write</b> (not just Read).<br><i>Repo dijumpai, tetapi token tidak boleh menulis. Semak token mempunyai kebenaran Contents: Read and write.</i>`;
+      $('dot-github').classList.add('bad'); $('dot-github').classList.remove('ok');
+      return;
+    }
+    // Clean up the test file so it doesn't clutter the repo
+    if(writeResult.sha){ ghDeleteFile(testPath, writeResult.sha, 'clean up connection test').catch(()=>{}); }
+    $('cfg-test-result').innerHTML = '✅ Connected — read and write both work. ／ Berjaya disambung — baca dan tulis berfungsi.';
+    $('dot-github').classList.add('ok'); $('dot-github').classList.remove('bad');
   }catch(e){
     $('cfg-test-result').textContent='⚠️ Network error reaching GitHub.';
-    $('dot-github').classList.add('bad');
+    $('dot-github').classList.add('bad'); $('dot-github').classList.remove('ok');
   }
 }
 function refreshConnectionDot(){
@@ -1391,15 +1415,20 @@ async function refreshRoomResults(){
 
 async function fetchLeaderboard(grade){
   const {json: index} = await ghGetJson(indexPath(grade));
-  if(index && Array.isArray(index.top)) return index.top;
-  const {json: listing} = await ghGetJson(`data/leaderboard/${grade}`);
-  if(!Array.isArray(listing) || !listing.length) return [];
+  if(index && Array.isArray(index.top)) return {items: index.top, error:false};
+  const {json: listing, error} = await ghGetJson(`data/leaderboard/${grade}`);
+  if(error){ return {items: [], error:true}; }
+  if(!Array.isArray(listing) || !listing.length) return {items: [], error:false};
   const recent = listing.sort((a,b)=> b.name.localeCompare(a.name)).slice(0, LEADERBOARD_SCAN_LIMIT);
   const files = await Promise.all(recent.map(f=>ghGetJson(f.path)));
-  return files.map(f=>f.json).filter(Boolean).sort((a,b)=>b.points-a.points).slice(0,10);
+  return {items: files.map(f=>f.json).filter(Boolean).sort((a,b)=>b.points-a.points).slice(0,10), error:false};
 }
-function leaderboardTableHtml(list){
-  if(!list.length) return '<p class="helptext">No scores yet — be the first! ／ Belum ada markah — jadilah yang pertama!</p>';
+function leaderboardTableHtml(result, emptyMsgEn, emptyMsgBm){
+  if(result.error){
+    return `<p class="helptext">⚠️ Could not load the leaderboard — check the GitHub connection in ⚙️ Admin (repo name, branch, and token permissions).<br><i>Tidak dapat memuatkan papan pendahulu — semak sambungan GitHub dalam ⚙️ Pentadbir.</i></p>`;
+  }
+  const list = result.items;
+  if(!list.length) return `<p class="helptext">${emptyMsgEn||'No scores yet — be the first!'} ／ ${emptyMsgBm||'Belum ada markah — jadilah yang pertama!'}</p>`;
   const top=[...list].sort((a,b)=>b.points-a.points).slice(0,10);
   const medals=['🥇','🥈','🥉'];
   const rows=top.map((e,i)=>`<tr><td>${medals[i]||(i+1)}</td><td>${escapeHtml(e.nickname)}</td><td>${e.score}/${e.total}</td><td>${e.points} pts</td></tr>`).join('');
@@ -1407,7 +1436,9 @@ function leaderboardTableHtml(list){
 }
 async function renderResultLeaderboard(){
   const box=$('result-leaderboard-box'); box.innerHTML='<p class="helptext">Loading… ／ Memuatkan…</p>';
-  box.innerHTML = leaderboardTableHtml(await fetchLeaderboard(state.grade));
+  const emptyEn = state.mode==='iq' ? 'No IQ scores yet — be the first!' : 'No scores yet — be the first!';
+  const emptyBm = state.mode==='iq' ? 'Belum ada skor IQ — jadilah yang pertama!' : 'Belum ada markah — jadilah yang pertama!';
+  box.innerHTML = leaderboardTableHtml(await fetchLeaderboard(state.grade), emptyEn, emptyBm);
 }
 async function loadLeaderboard(){
   const g=$('leader-grade-select').value; const box=$('leaderboard-box');
@@ -1421,9 +1452,10 @@ async function loadIQLeaderboardPreview(){
   if(!box) return;
   if(!loadGithubConfig().owner){ box.innerHTML='<p class="helptext">Connect GitHub to see the IQ leaderboard. ／ Sambung GitHub untuk lihat papan pendahulu IQ.</p>'; return; }
   box.innerHTML='<p class="helptext">Loading… ／ Memuatkan…</p>';
-  const list = await fetchLeaderboard('iq');
-  if(!list.length){ box.innerHTML='<p class="helptext">No IQ scores yet — be the first! ／ Belum ada skor IQ — jadilah yang pertama!</p>'; return; }
-  const top5 = [...list].sort((a,b)=>b.points-a.points).slice(0,5);
+  const result = await fetchLeaderboard('iq');
+  if(result.error){ box.innerHTML='<p class="helptext">⚠️ Could not load — check GitHub connection in ⚙️ Admin.</p>'; return; }
+  if(!result.items.length){ box.innerHTML='<p class="helptext">No IQ scores yet — be the first! ／ Belum ada skor IQ — jadilah yang pertama!</p>'; return; }
+  const top5 = [...result.items].sort((a,b)=>b.points-a.points).slice(0,5);
   const medals=['🥇','🥈','🥉'];
   box.innerHTML = top5.map((e,i)=>{
     const iq = Math.max(55, Math.min(145, 100 + (e.score-10)*3));
