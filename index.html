@@ -375,8 +375,8 @@
                 <div class="bm">Berikan kebenaran Contents — di bawah "Permissions" → "Repository permissions", tetapkan Contents kepada Read and write. Biarkan yang lain sebagai No access.</div></li>
             <li><div class="en"><b>Generate & copy it</b> — click "Generate token". Copy it immediately (starts with <code>github_pat_</code>) — it's shown only once.</div>
                 <div class="bm">Jana dan salin — klik "Generate token". Salin serta-merta (bermula dengan <code>github_pat_</code>) — ia hanya ditunjukkan sekali.</div></li>
-            <li><div class="en"><b>Paste it below & test</b> — fill in your username, repo name, and branch, paste the token in, then click "Test connection".</div>
-                <div class="bm">Tampal di bawah dan uji — isikan nama pengguna, nama repo, dan cawangan, tampal token, kemudian klik "Test connection".</div></li>
+            <li><div class="en"><b>Paste it below & test</b> — fill in your username, repo name, and branch, paste the token in, then click "Save & Test".</div>
+                <div class="bm">Tampal di bawah dan uji — isikan nama pengguna, nama repo, dan cawangan, tampal token, kemudian klik "Save & Test".</div></li>
           </ol>
         </div>
 
@@ -388,9 +388,9 @@
         <input type="text" id="cfg-branch" placeholder="main" value="main">
         <label>Personal access token ／ Token Akses Peribadi</label>
         <input type="password" id="cfg-token" placeholder="github_pat_...">
-        <div class="row" style="margin-top:14px;">
-          <button class="btn secondary" onclick="testGithub()">Test connection</button>
-          <button class="btn" onclick="saveGithubConfig()">Save ／ Simpan</button>
+        <p class="helptext">This always saves whatever is currently in the fields above before testing — so it's safe to click any time after making changes.<br><i>Ini sentiasa menyimpan apa yang ditaip di atas sebelum menguji — selamat diklik bila-bila selepas membuat perubahan.</i></p>
+        <div class="row" style="margin-top:6px;">
+          <button class="btn" onclick="saveGithubConfig()">💾 Save & Test ／ Simpan & Uji</button>
         </div>
         <div id="cfg-test-result" class="helptext"></div>
       </div>
