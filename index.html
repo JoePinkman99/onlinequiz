@@ -1122,7 +1122,11 @@ async function ghPutJson(path, jsonValue, message, sha){
   const body={ message: message||`update ${path}`, content: utf8ToB64(JSON.stringify(jsonValue, null, 2)), branch: c.branch };
   if(sha) body.sha=sha;
   const res=await fetch(ghBaseUrl(path), {method:'PUT', headers: ghHeaders(), body: JSON.stringify(body)});
-  if(!res.ok) return {ok:false};
+  if(!res.ok){
+    let msg='';
+    try{ const errBody = await res.json(); msg = errBody.message || ''; }catch(e){}
+    return {ok:false, status: res.status, message: msg};
+  }
   const data=await res.json();
   return {ok:true, sha: data.content && data.content.sha};
 }
@@ -1385,9 +1389,16 @@ async function submitScoreToGithub(){
   const path = scorePath(state.grade, state.nickname, ts);
   const entry = { nickname: state.nickname, score: state.score, total: state.quiz.length, points: state.points,
     mode: state.mode, date: new Date().toISOString() };
-  const {ok} = await ghPutJson(path, entry, `score: ${state.nickname} (${state.grade})`);
-  if(!ok) banner('⚠️ Could not save score to GitHub — check Admin connection.', 'err', 6000);
-  return ok;
+  const result = await ghPutJson(path, entry, `score: ${state.nickname} (${state.grade})`);
+  if(!result.ok){
+    console.error('Score save failed:', result);
+    const detail = result.status ? ` (HTTP ${result.status}${result.message ? ': '+result.message : ''})` : '';
+    banner(`⚠️ Could not save score to GitHub${detail} — path: ${path}`, 'err', 10000);
+  } else {
+    banner(`✅ Score saved to leaderboard! ／ Markah disimpan!`, 'ok', 4000);
+    console.log('Score saved to:', path);
+  }
+  return result.ok;
 }
 
 async function refreshRoomResults(){
