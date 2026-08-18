@@ -115,6 +115,15 @@
   .live-row.me{outline:2px solid var(--teal);}
 
   .footer-note{text-align:center;font-size:12px;opacity:.5;margin-top:24px;font-weight:700;}
+  .iq-card{border:2px solid var(--purple);background:linear-gradient(180deg, rgba(106,76,147,0.06), #fff 60px);}
+  .iq-score-badge{background:linear-gradient(135deg, var(--purple), #8a68b8);color:#fff;border-radius:18px;padding:16px;text-align:center;margin:12px 0;}
+  .iq-score-badge .num{font-family:'Baloo 2';font-weight:800;font-size:40px;}
+  .iq-score-badge .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;opacity:.85;}
+  .iq-score-badge .note{font-size:11px;opacity:.85;margin-top:6px;font-style:italic;}
+  .token-steps{margin:0 0 16px;padding-left:20px;}
+  .token-steps li{margin-bottom:12px;font-size:13px;line-height:1.5;}
+  .token-steps li .en{font-weight:700;}
+  .token-steps li .bm{opacity:.6;font-style:italic;font-size:12px;margin-top:2px;}
   .status-banner{font-size:12.5px;font-weight:800;padding:9px 12px;border-radius:12px;margin-bottom:14px;background:#FFF4E0;color:#8a5a00;display:none;}
   .status-banner.show{display:block;}
   .status-banner.err{background:#FCEAEC;color:#9c2233;}
@@ -214,6 +223,16 @@
       </div>
       <p class="helptext">Practice starts instantly, just for you. Competition puts you in a live lobby — as soon as 5 players from your grade are waiting, a room forms automatically and everyone gets the same questions at the same time.<br><i>Latihan bermula serta-merta, khas untuk anda. Pertandingan meletakkan anda dalam bilik menunggu langsung — sebaik sahaja 5 pemain dari tahun anda menunggu, satu bilik terbentuk secara automatik dan semua orang mendapat soalan yang sama pada masa yang sama.</i></p>
     </div>
+    <div class="card iq-card">
+      <h2 class="section-title">🧠 IQ Challenge<span class="bm">Cabaran IQ</span></h2>
+      <p class="lead tight">20 logic, pattern, and reasoning questions — a fun brain workout, open to any grade.<span class="bm">20 soalan logik, corak, dan penaakulan — senaman minda yang menyeronokkan, terbuka untuk semua tahun.</span></p>
+      <p class="helptext" style="margin-bottom:14px;">⚠️ This is a fun challenge, not a clinical or scientifically validated IQ test.<br><i>Ini ialah cabaran untuk keseronokan, bukan ujian IQ klinikal atau disahkan secara saintifik.</i></p>
+      <button class="btn" style="background:var(--purple);box-shadow:0 8px 20px rgba(106,76,147,0.30);" onclick="startIQChallenge()">🧠 Start IQ Challenge<span class="bm">Mula Cabaran IQ</span></button>
+      <div style="margin-top:16px;">
+        <div class="helptext" style="margin-bottom:6px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;">🏅 IQ Leaderboard ／ Papan Pendahulu IQ</div>
+        <div id="iq-leaderboard-box"><p class="helptext">Connect GitHub to see the IQ leaderboard. ／ Sambung GitHub untuk lihat papan pendahulu IQ.</p></div>
+      </div>
+    </div>
     <div class="card">
       <h2 class="section-title" style="font-size:16px;">🏅 Leaderboard<span class="bm">Papan Pendahulu</span></h2>
       <select id="leader-grade-select" onchange="loadLeaderboard()"></select>
@@ -283,6 +302,11 @@
       <div class="speech" id="result-mascot-speech"><div class="en">Great job!</div><div class="bm">Syabas!</div></div>
       <div class="score-big" id="result-score">0/10</div>
       <div class="score-label">Points / Mata: <span id="result-points">0</span></div>
+      <div id="iq-score-badge" class="iq-score-badge" style="display:none;">
+        <div class="lbl">Estimated IQ score ／ Anggaran Skor IQ</div>
+        <div class="num" id="iq-score-num">100</div>
+        <div class="note">For fun only, not a clinical assessment. ／ Untuk keseronokan sahaja, bukan penilaian klinikal.</div>
+      </div>
       <button class="btn" onclick="backToHome()">Back to home<span class="bm">Kembali ke Laman Utama</span></button>
     </div>
     <div class="card" id="room-results-card" style="display:none;">
@@ -292,7 +316,7 @@
       <div id="room-results-box"></div>
     </div>
     <div class="card">
-      <h2 class="section-title" style="font-size:16px;">🏅 All-time leaderboard<span class="bm">Papan Pendahulu Sepanjang Masa</span></h2>
+      <h2 class="section-title" style="font-size:16px;" id="result-leaderboard-title">🏅 All-time leaderboard<span class="bm">Papan Pendahulu Sepanjang Masa</span></h2>
       <div id="result-leaderboard-box"></div>
     </div>
   </div>
@@ -334,6 +358,27 @@
           <b>How this scales to hundreds of players:</b> each player writes their own uniquely-named file to join a lobby — nothing to conflict over. Every client sorts the lobby folder and groups every 5 players by position, so rooms form without any central lock. Polling uses conditional requests (ETags), so unchanged checks don't count against GitHub's rate limit.
           <br><i>Setiap pemain menulis fail sendiri untuk menyertai bilik — tiada percanggahan. Setiap peranti mengisih senarai dan mengumpulkan setiap 5 pemain mengikut kedudukan, jadi bilik terbentuk tanpa sebarang kawalan pusat.</i>
         </p>
+
+        <button type="button" class="btn secondary small" style="margin-bottom:12px;" onclick="toggleTokenGuide()">📋 How to get a GitHub token ／ Cara Dapatkan Token GitHub</button>
+        <div id="token-guide" style="display:none;background:var(--bg2);border-radius:14px;padding:16px 16px 4px;margin-bottom:16px;">
+          <ol class="token-steps">
+            <li><div class="en"><b>Create a repo first</b> — go to github.com, click + → New repository. Name it e.g. <code>kancil-kira-data</code>. Private or public both work.</div>
+                <div class="bm">Cipta repo dahulu — pergi ke github.com, klik + → New repository. Namakan cth. <code>kancil-kira-data</code>. Peribadi atau awam kedua-duanya boleh.</div></li>
+            <li><div class="en"><b>Open the token page</b> — go to <a href="https://github.com/settings/tokens?type=beta" target="_blank">github.com/settings/tokens?type=beta</a> to create a fine-grained token.</div>
+                <div class="bm">Buka halaman token — pergi ke <a href="https://github.com/settings/tokens?type=beta" target="_blank">github.com/settings/tokens?type=beta</a> untuk mencipta token fine-grained.</div></li>
+            <li><div class="en"><b>Name it & set an expiry</b> — e.g. "Kancil Kira-Kira quiz app". Choose "No expiration" or a date far ahead so it doesn't expire mid-term.</div>
+                <div class="bm">Namakan dan tetapkan tarikh luput — cth. "Kancil Kira-Kira quiz app". Pilih "No expiration" atau tarikh jauh di hadapan.</div></li>
+            <li><div class="en"><b>Limit it to your repo</b> — under "Repository access", choose "Only select repositories" and pick the one you made.</div>
+                <div class="bm">Hadkan kepada repo anda — di bawah "Repository access", pilih "Only select repositories" dan pilih repo yang dicipta.</div></li>
+            <li><div class="en"><b>Grant Contents permission</b> — under "Permissions" → "Repository permissions", set <b>Contents</b> to <b>Read and write</b>. Leave everything else as "No access".</div>
+                <div class="bm">Berikan kebenaran Contents — di bawah "Permissions" → "Repository permissions", tetapkan Contents kepada Read and write. Biarkan yang lain sebagai No access.</div></li>
+            <li><div class="en"><b>Generate & copy it</b> — click "Generate token". Copy it immediately (starts with <code>github_pat_</code>) — it's shown only once.</div>
+                <div class="bm">Jana dan salin — klik "Generate token". Salin serta-merta (bermula dengan <code>github_pat_</code>) — ia hanya ditunjukkan sekali.</div></li>
+            <li><div class="en"><b>Paste it below & test</b> — fill in your username, repo name, and branch, paste the token in, then click "Test connection".</div>
+                <div class="bm">Tampal di bawah dan uji — isikan nama pengguna, nama repo, dan cawangan, tampal token, kemudian klik "Test connection".</div></li>
+          </ol>
+        </div>
+
         <label>GitHub username / org</label>
         <input type="text" id="cfg-owner" placeholder="e.g. hafizwan">
         <label>Repository name ／ Nama Repositori</label>
@@ -758,6 +803,33 @@ const BANK = {
 };
 
 /* ============================================================
+   IQ CHALLENGE — 20 bilingual logic/pattern/reasoning questions.
+   For fun only — not a validated psychometric IQ test.
+============================================================ */
+const IQ_BANK = [
+  {q_en:"2, 4, 6, 8, ?", q_bm:"2, 4, 6, 8, ?", choices:["9","10","11","12"], answer:"10", explain_en:"Each number increases by 2 — this is the even number sequence.", explain_bm:"Setiap nombor bertambah 2 — ini ialah turutan nombor genap."},
+  {q_en:"3, 6, 9, 12, ?", q_bm:"3, 6, 9, 12, ?", choices:["13","14","15","16"], answer:"15", explain_en:"Each number increases by 3 — these are multiples of 3.", explain_bm:"Setiap nombor bertambah 3 — ini ialah gandaan 3."},
+  {q_en:"Which one is different: Apple, Banana, Carrot, Mango?", q_bm:"Yang manakah berbeza: Epal, Pisang, Lobak, Mangga?", choices:["Apple / Epal","Banana / Pisang","Carrot / Lobak","Mango / Mangga"], answer:"Carrot / Lobak", explain_en:"Apple, banana, and mango are fruits — a carrot is a vegetable.", explain_bm:"Epal, pisang, dan mangga ialah buah-buahan — lobak ialah sayur-sayuran."},
+  {q_en:"Bird is to Sky as Fish is to ___?", q_bm:"Burung dengan Langit, sama seperti Ikan dengan ___?", choices:["Water / Air","Tree / Pokok","Sand / Pasir","Grass / Rumput"], answer:"Water / Air", explain_en:"A bird lives and moves in the sky, just like a fish lives and moves in water.", explain_bm:"Burung hidup dan bergerak di langit, sama seperti ikan hidup dan bergerak di dalam air."},
+  {q_en:"Circle, Square, Circle, Square, ?", q_bm:"Bulatan, Segi Empat Sama, Bulatan, Segi Empat Sama, ?", choices:["Circle / Bulatan","Square / Segi Empat Sama","Triangle / Segi Tiga","Star / Bintang"], answer:"Circle / Bulatan", explain_en:"The pattern alternates: circle, square, circle, square — so a circle comes next.", explain_bm:"Corak berselang-seli: bulatan, segi empat sama — jadi bulatan seterusnya."},
+  {q_en:"A, C, E, G, ?", q_bm:"A, C, E, G, ?", choices:["H","I","J","K"], answer:"I", explain_en:"The pattern skips one letter each time: A, C, E, G, I.", explain_bm:"Corak melangkau satu huruf setiap kali: A, C, E, G, I."},
+  {q_en:"Which does not belong: Dog, Cat, Fish, Chair?", q_bm:"Yang manakah tidak sepadan: Anjing, Kucing, Ikan, Kerusi?", choices:["Dog / Anjing","Cat / Kucing","Fish / Ikan","Chair / Kerusi"], answer:"Chair / Kerusi", explain_en:"Dog, cat, and fish are all animals — a chair is furniture.", explain_bm:"Anjing, kucing, dan ikan semuanya haiwan — kerusi ialah perabot."},
+  {q_en:"All cats are animals. Whiskers is a cat. Is Whiskers an animal?", q_bm:"Semua kucing ialah haiwan. Whiskers ialah seekor kucing. Adakah Whiskers seekor haiwan?", choices:["Yes / Ya","No / Tidak","Maybe / Mungkin","Not enough info / Maklumat tidak cukup"], answer:"Yes / Ya", explain_en:"If all cats are animals, and Whiskers is a cat, then Whiskers must be an animal too.", explain_bm:"Jika semua kucing ialah haiwan, dan Whiskers seekor kucing, maka Whiskers juga pasti haiwan."},
+  {q_en:"1, 2, 4, 8, ?", q_bm:"1, 2, 4, 8, ?", choices:["10","12","14","16"], answer:"16", explain_en:"Each number doubles: 1, 2, 4, 8, 16.", explain_bm:"Setiap nombor menjadi dua kali ganda: 1, 2, 4, 8, 16."},
+  {q_en:"Doctor is to Hospital as Teacher is to ___?", q_bm:"Doktor dengan Hospital, sama seperti Guru dengan ___?", choices:["School / Sekolah","Shop / Kedai","Farm / Ladang","Kitchen / Dapur"], answer:"School / Sekolah", explain_en:"A doctor works in a hospital, just like a teacher works in a school.", explain_bm:"Doktor bekerja di hospital, sama seperti guru bekerja di sekolah."},
+  {q_en:"Which shape has no straight sides?", q_bm:"Bentuk manakah tiada sisi lurus?", choices:["Circle / Bulatan","Square / Segi Empat Sama","Triangle / Segi Tiga","Rectangle / Segi Empat Tepat"], answer:"Circle / Bulatan", explain_en:"A circle is made of one curved line, with no straight sides at all.", explain_bm:"Bulatan dibentuk oleh satu garis melengkung, tiada sisi lurus langsung."},
+  {q_en:"5, 10, 20, 40, ?", q_bm:"5, 10, 20, 40, ?", choices:["60","70","80","90"], answer:"80", explain_en:"Each number doubles: 5, 10, 20, 40, 80.", explain_bm:"Setiap nombor menjadi dua kali ganda: 5, 10, 20, 40, 80."},
+  {q_en:"Which is not a mode of transport: Car, Bicycle, Airplane, Table?", q_bm:"Yang manakah bukan pengangkutan: Kereta, Basikal, Kapal Terbang, Meja?", choices:["Car / Kereta","Bicycle / Basikal","Airplane / Kapal Terbang","Table / Meja"], answer:"Table / Meja", explain_en:"A car, bicycle, and airplane all carry people from place to place — a table doesn't move.", explain_bm:"Kereta, basikal, dan kapal terbang semuanya membawa orang — meja tidak bergerak."},
+  {q_en:"If today is Monday, what day will it be in 3 days?", q_bm:"Jika hari ini Isnin, hari apakah selepas 3 hari?", choices:["Wednesday / Rabu","Thursday / Khamis","Friday / Jumaat","Saturday / Sabtu"], answer:"Thursday / Khamis", explain_en:"Monday + 3 days: Tuesday, Wednesday, Thursday. So it will be Thursday.", explain_bm:"Isnin + 3 hari: Selasa, Rabu, Khamis. Jadi ia akan menjadi hari Khamis."},
+  {q_en:"🔺🔺🔵 🔺🔺🔵 🔺🔺 ?", q_bm:"🔺🔺🔵 🔺🔺🔵 🔺🔺 ?", choices:["🔺","🔵","🟨","⬛"], answer:"🔵", explain_en:"The pattern repeats every 3 symbols: triangle, triangle, circle. After two triangles comes a circle.", explain_bm:"Corak berulang setiap 3 simbol: segi tiga, segi tiga, bulatan. Selepas dua segi tiga datang bulatan."},
+  {q_en:"50, 45, 40, 35, ?", q_bm:"50, 45, 40, 35, ?", choices:["25","30","32","34"], answer:"30", explain_en:"Each number decreases by 5: 50, 45, 40, 35, 30.", explain_bm:"Setiap nombor berkurang 5: 50, 45, 40, 35, 30."},
+  {q_en:"Puppy is to Dog as Kitten is to ___?", q_bm:"Anak Anjing dengan Anjing, sama seperti Anak Kucing dengan ___?", choices:["Cat / Kucing","Bird / Burung","Cow / Lembu","Rabbit / Arnab"], answer:"Cat / Kucing", explain_en:"A puppy grows into a dog, just like a kitten grows into a cat.", explain_bm:"Anak anjing membesar menjadi anjing, sama seperti anak kucing membesar menjadi kucing."},
+  {q_en:"Which is NOT an even number: 12, 18, 7, 24?", q_bm:"Yang manakah BUKAN nombor genap: 12, 18, 7, 24?", choices:["12","18","7","24"], answer:"7", explain_en:"Even numbers end in 0,2,4,6,8. 7 is odd, so it doesn't belong.", explain_bm:"Nombor genap berakhir dengan 0,2,4,6,8. 7 ialah ganjil, jadi ia tidak sepadan."},
+  {q_en:"If a triangle has 3 sides, how many sides do two triangles have altogether?", q_bm:"Jika segi tiga mempunyai 3 sisi, berapakah jumlah sisi bagi dua segi tiga?", choices:["4","5","6","9"], answer:"6", explain_en:"One triangle has 3 sides, so two triangles have 3+3 = 6 sides altogether.", explain_bm:"Satu segi tiga mempunyai 3 sisi, jadi dua segi tiga mempunyai 3+3 = 6 sisi kesemuanya."},
+  {q_en:"Sarah is older than Mia. Mia is older than Ali. Who is the youngest?", q_bm:"Sarah lebih tua daripada Mia. Mia lebih tua daripada Ali. Siapakah paling muda?", choices:["Sarah","Mia","Ali","Cannot tell / Tidak dapat ditentukan"], answer:"Ali", explain_en:"Sarah > Mia > Ali in age, so Ali is the youngest of the three.", explain_bm:"Sarah > Mia > Ali mengikut umur, jadi Ali yang paling muda antara ketiga-tiga."},
+];
+
+/* ============================================================
    STATE
 ============================================================ */
 let state = {
@@ -943,6 +1015,10 @@ function fillConfigForm(){
   $('cfg-owner').value=g.owner; $('cfg-repo').value=g.repo; $('cfg-branch').value=g.branch||'main'; $('cfg-token').value=g.token;
 }
 
+function toggleTokenGuide(){
+  const el = $('token-guide');
+  el.style.display = (el.style.display==='none') ? 'block' : 'none';
+}
 function switchAdminTab(tab){
   document.querySelectorAll('.admin-tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
   document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
@@ -956,7 +1032,7 @@ async function saveGithubConfig(){
   localStorage.setItem('kk_branch', $('cfg-branch').value.trim()||'main');
   localStorage.setItem('kk_token', $('cfg-token').value.trim());
   await testGithub();
-  if(loadGithubConfig().owner){ loadLeaderboard(); }
+  if(loadGithubConfig().owner){ loadLeaderboard(); loadIQLeaderboardPreview(); }
 }
 async function testGithub(){
   $('cfg-test-result').textContent='Testing… ／ Menguji…';
@@ -1066,6 +1142,13 @@ function startPractice(){
   if(!state.grade){ alert('Please choose a grade. ／ Sila pilih tahun.'); return; }
   state.mode='practice'; state.roomGroup=null;
   beginQuiz(pickRandom(BANK[state.grade], Math.min(QUIZ_LENGTH, BANK[state.grade].length)));
+}
+
+function startIQChallenge(){
+  state.nickname = readNickname();
+  if(!state.nickname){ alert('Please enter a nickname. ／ Sila masukkan nama.'); return; }
+  state.mode='iq'; state.grade='iq'; state.roomGroup=null;
+  beginQuiz(pickRandom(IQ_BANK, IQ_BANK.length)); // shuffle order, use all 20
 }
 
 async function joinCompetition(){
@@ -1244,17 +1327,33 @@ async function finishQuiz(){
   $('result-score').textContent=`${state.score}/${state.quiz.length}`;
   $('result-points').textContent=state.points;
   const ratio=state.score/state.quiz.length;
-  const msg = ratio===1 ? {en:"Perfect score! You're a maths champion! 🏆", bm:"Markah sempurna! Anda juara matematik! 🏆"} :
-    ratio>=0.7 ? {en:"Great work! Kancil is proud of you!", bm:"Kerja yang bagus! Kancil bangga dengan anda!"} :
-    ratio>=0.4 ? {en:"Good try! Practice makes perfect.", bm:"Cubaan yang baik! Amalan menjadikan sempurna."} :
-    {en:"Keep practicing — you'll get better every time!", bm:"Teruskan berlatih — anda akan bertambah baik setiap kali!"};
-  $('result-mascot-speech').innerHTML = `<div class="en">${msg.en}</div><div class="bm">${msg.bm}</div>`;
+
+  if(state.mode==='iq'){
+    const iqScore = Math.max(55, Math.min(145, 100 + (state.score-10)*3));
+    $('iq-score-num').textContent = iqScore;
+    $('iq-score-badge').style.display='block';
+    const msg = ratio===1 ? {en:"Outstanding! Every question solved! 🧠", bm:"Cemerlang! Semua soalan diselesaikan! 🧠"} :
+      ratio>=0.7 ? {en:"Sharp thinking! Great reasoning skills!", bm:"Pemikiran yang tajam! Kemahiran menaakul yang bagus!"} :
+      ratio>=0.4 ? {en:"Good effort! Logic puzzles take practice.", bm:"Usaha yang baik! Teka-teki logik perlukan latihan."} :
+      {en:"Nice try! Every attempt sharpens your mind.", bm:"Percubaan yang baik! Setiap percubaan mengasah minda."};
+    $('result-mascot-speech').innerHTML = `<div class="en">${msg.en}</div><div class="bm">${msg.bm}</div>`;
+    $('result-leaderboard-title').innerHTML = `🧠 IQ Leaderboard<span class="bm">Papan Pendahulu IQ</span>`;
+  } else {
+    $('iq-score-badge').style.display='none';
+    const msg = ratio===1 ? {en:"Perfect score! You're a maths champion! 🏆", bm:"Markah sempurna! Anda juara matematik! 🏆"} :
+      ratio>=0.7 ? {en:"Great work! Kancil is proud of you!", bm:"Kerja yang bagus! Kancil bangga dengan anda!"} :
+      ratio>=0.4 ? {en:"Good try! Practice makes perfect.", bm:"Cubaan yang baik! Amalan menjadikan sempurna."} :
+      {en:"Keep practicing — you'll get better every time!", bm:"Teruskan berlatih — anda akan bertambah baik setiap kali!"};
+    $('result-mascot-speech').innerHTML = `<div class="en">${msg.en}</div><div class="bm">${msg.bm}</div>`;
+    $('result-leaderboard-title').innerHTML = `🏅 All-time leaderboard<span class="bm">Papan Pendahulu Sepanjang Masa</span>`;
+  }
 
   $('room-results-card').style.display = (state.mode==='competition' && state.roomGroup) ? 'block' : 'none';
 
   if(validateGithubOrWarn()){ await submitScoreToGithub(); }
   if(state.mode==='competition' && state.roomGroup){ await refreshRoomResults(); }
   await renderResultLeaderboard();
+  if(state.mode==='iq'){ loadIQLeaderboardPreview(); }
 }
 
 async function submitScoreToGithub(){
@@ -1315,6 +1414,21 @@ async function loadLeaderboard(){
   if(!loadGithubConfig().owner){ box.innerHTML='<p class="helptext">Connect GitHub in ⚙️ Admin to see leaderboards.</p>'; return; }
   box.innerHTML='<p class="helptext">Loading… ／ Memuatkan…</p>';
   box.innerHTML = leaderboardTableHtml(await fetchLeaderboard(g));
+}
+
+async function loadIQLeaderboardPreview(){
+  const box=$('iq-leaderboard-box');
+  if(!box) return;
+  if(!loadGithubConfig().owner){ box.innerHTML='<p class="helptext">Connect GitHub to see the IQ leaderboard. ／ Sambung GitHub untuk lihat papan pendahulu IQ.</p>'; return; }
+  box.innerHTML='<p class="helptext">Loading… ／ Memuatkan…</p>';
+  const list = await fetchLeaderboard('iq');
+  if(!list.length){ box.innerHTML='<p class="helptext">No IQ scores yet — be the first! ／ Belum ada skor IQ — jadilah yang pertama!</p>'; return; }
+  const top5 = [...list].sort((a,b)=>b.points-a.points).slice(0,5);
+  const medals=['🥇','🥈','🥉'];
+  box.innerHTML = top5.map((e,i)=>{
+    const iq = Math.max(55, Math.min(145, 100 + (e.score-10)*3));
+    return `<div class="live-row"><span>${medals[i]||(i+1)} ${escapeHtml(e.nickname)}</span><span>${e.score}/${e.total} · IQ ~${iq}</span></div>`;
+  }).join('');
 }
 
 let adminLiveHandle=null;
@@ -1384,7 +1498,7 @@ function backToHome(){
 }
 
 fillConfigForm();
-if(loadGithubConfig().owner){ loadLeaderboard(); }
+if(loadGithubConfig().owner){ loadLeaderboard(); loadIQLeaderboardPreview(); }
 </script>
 </body>
 </html>
