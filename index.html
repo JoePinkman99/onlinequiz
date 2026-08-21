@@ -225,7 +225,7 @@
     </div>
     <div class="card iq-card">
       <h2 class="section-title">🧠 IQ Challenge<span class="bm">Cabaran IQ</span></h2>
-      <p class="lead tight">20 logic, pattern, and reasoning questions — a fun brain workout, open to any grade.<span class="bm">20 soalan logik, corak, dan penaakulan — senaman minda yang menyeronokkan, terbuka untuk semua tahun.</span></p>
+      <p class="lead tight">20 questions drawn randomly each time from a pool of 400+ logic, pattern, and reasoning puzzles — a fresh brain workout every attempt, open to any grade.<span class="bm">20 soalan diambil secara rawak setiap kali daripada kumpulan lebih 400 teka-teki logik, corak, dan penaakulan — segar setiap percubaan, terbuka untuk semua tahun.</span></p>
       <p class="helptext" style="margin-bottom:14px;">⚠️ This is a fun challenge, not a clinical or scientifically validated IQ test.<br><i>Ini ialah cabaran untuk keseronokan, bukan ujian IQ klinikal atau disahkan secara saintifik.</i></p>
       <button class="btn" style="background:var(--purple);box-shadow:0 8px 20px rgba(106,76,147,0.30);" onclick="startIQChallenge()">🧠 Start IQ Challenge<span class="bm">Mula Cabaran IQ</span></button>
       <div style="margin-top:16px;">
@@ -446,6 +446,7 @@ const LOBBY_SIZE = 5;
 const LOBBY_POLL_MS = 4000;
 const COUNTDOWN_MS = 8000;
 const QUIZ_LENGTH = 10;
+const IQ_QUIZ_LENGTH = 20;
 const LEADERBOARD_SCAN_LIMIT = 30;
 
 /* ============================================================
@@ -804,10 +805,265 @@ const BANK = {
 };
 
 /* ============================================================
-   IQ CHALLENGE — 20 bilingual logic/pattern/reasoning questions.
+   IQ CHALLENGE — question pool.
+   Rather than hand-writing 300+ static questions, a set of
+   parameterised generators produce a large pool of distinct
+   bilingual (EN/BM) logic, pattern, and reasoning questions.
+   The pool is built once at page load, deduplicated by question
+   text, and each playthrough draws IQ_QUIZ_LENGTH fresh random
+   questions from it — so the set is different almost every time.
    For fun only — not a validated psychometric IQ test.
 ============================================================ */
-const IQ_BANK = [
+
+function iqShuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function iqSample(arr, n){ return iqShuffle(arr).slice(0, n); }
+function iqRandInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+// Builds `count` distinct positive number choices around `correct`, spaced by `step`.
+function iqNumChoices(correct, step, count){
+  step = Math.max(1, Math.abs(Math.round(step)) || 1);
+  const set = new Set([correct]);
+  let k=1;
+  while(set.size<count && k<300){
+    [correct+step*k, correct-step*k, correct+step*(k+2), correct-step*(k+2)].forEach(v=>{
+      if(v>=0 && !set.has(v) && set.size<count) set.add(v);
+    });
+    k++;
+  }
+  return iqShuffle(Array.from(set)).map(String);
+}
+
+/* ---- word banks used by several generators ---- */
+const IQ_WORD_GROUPS = [
+  {a:[["Apple","Epal"],["Banana","Pisang"],["Mango","Mangga"],["Orange","Oren"],["Grape","Anggur"],["Papaya","Betik"],["Watermelon","Tembikai"],["Pineapple","Nanas"]], aLabel:["fruits","buah-buahan"],
+   b:[["Carrot","Lobak"],["Potato","Kentang"],["Cabbage","Kobis"],["Spinach","Bayam"],["Onion","Bawang"],["Cucumber","Timun"]], bLabel:["a vegetable","sayur-sayuran"]},
+  {a:[["Dog","Anjing"],["Cat","Kucing"],["Cow","Lembu"],["Goat","Kambing"],["Rabbit","Arnab"],["Horse","Kuda"],["Elephant","Gajah"],["Tiger","Harimau"],["Chicken","Ayam"]], aLabel:["animals","haiwan"],
+   b:[["Chair","Kerusi"],["Table","Meja"],["Bed","Katil"],["Sofa","Sofa"],["Cupboard","Almari"]], bLabel:["furniture","perabot"]},
+  {a:[["Car","Kereta"],["Bicycle","Basikal"],["Bus","Bas"],["Train","Keretapi"],["Airplane","Kapal Terbang"],["Boat","Bot"],["Motorcycle","Motosikal"]], aLabel:["modes of transport","pengangkutan"],
+   b:[["Pencil","Pensel"],["Book","Buku"],["Eraser","Pemadam"],["Ruler","Pembaris"]], bLabel:["a stationery item","alat tulis"]},
+  {a:[["Circle","Bulatan"],["Oval","Bujur"],["Sphere","Sfera"]], aLabel:["round shapes","bentuk bulat"],
+   b:[["Square","Segi Empat Sama"],["Triangle","Segi Tiga"],["Rectangle","Segi Empat Tepat"],["Pentagon","Pentagon"]], bLabel:["a shape with straight sides","bentuk bersudut"]},
+  {a:[["Guitar","Gitar"],["Piano","Piano"],["Violin","Biola"],["Drum","Gendang"],["Flute","Serunai"]], aLabel:["musical instruments","alat muzik"],
+   b:[["Hammer","Tukul"],["Screwdriver","Pemutar Skru"],["Wrench","Sepana"]], bLabel:["a tool","alat"]},
+];
+
+const IQ_ANALOGY_PAIRS = [
+  {a:["Bird","Burung"], b:["Sky","Langit"], c:["Fish","Ikan"], d:["Water","Air"]},
+  {a:["Doctor","Doktor"], b:["Hospital","Hospital"], c:["Teacher","Guru"], d:["School","Sekolah"]},
+  {a:["Puppy","Anak Anjing"], b:["Dog","Anjing"], c:["Kitten","Anak Kucing"], d:["Cat","Kucing"]},
+  {a:["Chef","Cef"], b:["Kitchen","Dapur"], c:["Farmer","Petani"], d:["Farm","Ladang"]},
+  {a:["Pilot","Juruterbang"], b:["Airplane","Kapal Terbang"], c:["Driver","Pemandu"], d:["Car","Kereta"]},
+  {a:["Author","Penulis"], b:["Book","Buku"], c:["Painter","Pelukis"], d:["Painting","Lukisan"]},
+  {a:["Key","Kunci"], b:["Lock","Mangga"], c:["Password","Kata Laluan"], d:["Account","Akaun"]},
+  {a:["Cub","Anak Singa"], b:["Lion","Singa"], c:["Calf","Anak Lembu"], d:["Cow","Lembu"]},
+  {a:["Sun","Matahari"], b:["Day","Siang"], c:["Moon","Bulan"], d:["Night","Malam"]},
+  {a:["Cold","Sejuk"], b:["Ice","Ais"], c:["Hot","Panas"], d:["Fire","Api"]},
+  {a:["Pen","Pen"], b:["Write","Tulis"], c:["Knife","Pisau"], d:["Cut","Potong"]},
+  {a:["Bee","Lebah"], b:["Honey","Madu"], c:["Cow","Lembu"], d:["Milk","Susu"]},
+  {a:["Nurse","Jururawat"], b:["Clinic","Klinik"], c:["Librarian","Pustakawan"], d:["Library","Perpustakaan"]},
+  {a:["Wing","Sayap"], b:["Bird","Burung"], c:["Fin","Sirip"], d:["Fish","Ikan"]},
+  {a:["Seed","Biji Benih"], b:["Tree","Pokok"], c:["Egg","Telur"], d:["Chick","Anak Ayam"]},
+  {a:["Actor","Pelakon"], b:["Stage","Pentas"], c:["Swimmer","Perenang"], d:["Pool","Kolam"]},
+  {a:["Thermometer","Termometer"], b:["Temperature","Suhu"], c:["Clock","Jam"], d:["Time","Masa"]},
+  {a:["Petal","Kelopak"], b:["Flower","Bunga"], c:["Leaf","Daun"], d:["Tree","Pokok"]},
+  {a:["Baker","Tukang Roti"], b:["Bread","Roti"], c:["Tailor","Tukang Jahit"], d:["Clothes","Pakaian"]},
+  {a:["North","Utara"], b:["South","Selatan"], c:["East","Timur"], d:["West","Barat"]},
+  {a:["Up","Atas"], b:["Down","Bawah"], c:["Left","Kiri"], d:["Right","Kanan"]},
+  {a:["Big","Besar"], b:["Small","Kecil"], c:["Tall","Tinggi"], d:["Short","Pendek"]},
+  {a:["Hot","Panas"], b:["Cold","Sejuk"], c:["Fast","Pantas"], d:["Slow","Perlahan"]},
+  {a:["Author","Penulis"], b:["Novel","Novel"], c:["Composer","Komposer"], d:["Song","Lagu"]},
+  {a:["Umbrella","Payung"], b:["Rain","Hujan"], c:["Sunglasses","Cermin Mata Hitam"], d:["Sun","Matahari"]},
+];
+
+const IQ_NAMES = ["Ali","Siti","Mia","Ravi","Aisyah","Hafiz","Nur","Farah","Daniel","Aina","Kavi","Wei Ming"];
+const IQ_ATTRS = [
+  {en:"older", bm:"lebih tua", lowest_en:"youngest", lowest_bm:"paling muda", highest_en:"oldest", highest_bm:"paling tua"},
+  {en:"taller", bm:"lebih tinggi", lowest_en:"shortest", lowest_bm:"paling pendek", highest_en:"tallest", highest_bm:"paling tinggi"},
+  {en:"faster", bm:"lebih pantas", lowest_en:"slowest", lowest_bm:"paling perlahan", highest_en:"fastest", highest_bm:"paling pantas"},
+  {en:"heavier", bm:"lebih berat", lowest_en:"lightest", lowest_bm:"paling ringan", highest_en:"heaviest", highest_bm:"paling berat"},
+];
+const IQ_SHAPES_SIDES = [{en:"triangle",bm:"segi tiga",sides:3},{en:"square",bm:"segi empat sama",sides:4},{en:"pentagon",bm:"pentagon",sides:5},{en:"hexagon",bm:"heksagon",sides:6}];
+const IQ_EMOJI_SETS = [["🔺","🔵"],["⭐","🌙"],["🍎","🍌"],["🟥","🟨"],["🐱","🐶"],["🔶","🔷"]];
+
+/* ---- generators: each returns ONE question object, or null if it couldn't ---- */
+function genArithmeticSeq(){
+  const start = iqRandInt(2, 60);
+  const step = iqRandInt(1, 9);
+  const decreasing = Math.random() < 0.35 && start > step*6;
+  const s = decreasing ? -step : step;
+  const terms = [start, start+s, start+2*s, start+3*s];
+  const answer = start+4*s;
+  if(answer < 0) return null;
+  const qtext = `${terms.join(', ')}, ?`;
+  return {
+    q_en: qtext, q_bm: qtext,
+    choices: iqNumChoices(answer, step, 4), answer: String(answer),
+    explain_en: `Each number ${decreasing?'decreases':'increases'} by ${step}.`,
+    explain_bm: `Setiap nombor ${decreasing?'berkurang':'bertambah'} ${step}.`,
+  };
+}
+function genGeometricSeq(){
+  const start = iqRandInt(1, 12);
+  const mult = iqRandInt(2, 3);
+  const terms = [start, start*mult, start*mult*mult, start*mult*mult*mult];
+  const answer = start*Math.pow(mult,4);
+  if(answer > 50000) return null;
+  const qtext = `${terms.join(', ')}, ?`;
+  return {
+    q_en: qtext, q_bm: qtext,
+    choices: iqNumChoices(answer, Math.max(1, Math.round(answer*0.2)), 4), answer: String(answer),
+    explain_en: `Each number is multiplied by ${mult}.`,
+    explain_bm: `Setiap nombor didarab dengan ${mult}.`,
+  };
+}
+function genLetterSeq(){
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const skip = iqRandInt(1,3);
+  const gap = skip+1;
+  const startIdx = iqRandInt(0, letters.length-1-4*gap);
+  if(startIdx < 0) return null;
+  const idxs = [0,1,2,3].map(i=>startIdx+i*gap);
+  const answerIdx = startIdx+4*gap;
+  if(answerIdx >= letters.length) return null;
+  const qtext = `${idxs.map(i=>letters[i]).join(', ')}, ?`;
+  const answer = letters[answerIdx];
+  const distractIdxs = iqSample([answerIdx-1, answerIdx+1, answerIdx-2, answerIdx+2].filter(i=>i>=0 && i<letters.length && i!==answerIdx), 3);
+  const choices = iqShuffle([answer, ...distractIdxs.map(i=>letters[i])]);
+  return {
+    q_en: qtext, q_bm: qtext, choices, answer,
+    explain_en: `The pattern skips ${skip} letter${skip>1?'s':''} each time.`,
+    explain_bm: `Corak melangkau ${skip} huruf setiap kali.`,
+  };
+}
+function genOddOneOut(){
+  const group = IQ_WORD_GROUPS[iqRandInt(0, IQ_WORD_GROUPS.length-1)];
+  const threeA = iqSample(group.a, 3);
+  const oneB = iqSample(group.b, 1)[0];
+  const options = iqShuffle([...threeA, oneB]);
+  const q_en = `Which one is different: ${options.map(o=>o[0]).join(', ')}?`;
+  const q_bm = `Yang manakah berbeza: ${options.map(o=>o[1]).join(', ')}?`;
+  const choices = options.map(o=>`${o[0]} / ${o[1]}`);
+  const answer = `${oneB[0]} / ${oneB[1]}`;
+  return {
+    q_en, q_bm, choices, answer,
+    explain_en: `${threeA.map(a=>a[0]).join(', ')} are all ${group.aLabel[0]} — ${oneB[0]} is ${group.bLabel[0]}.`,
+    explain_bm: `${threeA.map(a=>a[1]).join(', ')} semuanya ${group.aLabel[1]} — ${oneB[1]} ialah ${group.bLabel[1]}.`,
+  };
+}
+function genAnalogy(){
+  const p = IQ_ANALOGY_PAIRS[iqRandInt(0, IQ_ANALOGY_PAIRS.length-1)];
+  const reverse = Math.random() < 0.5;
+  const [x,y,z,answer] = reverse ? [p.c,p.d,p.a,p.b] : [p.a,p.b,p.c,p.d];
+  const q_en = `${x[0]} is to ${y[0]} as ${z[0]} is to ___?`;
+  const q_bm = `${x[1]} dengan ${y[1]}, sama seperti ${z[1]} dengan ___?`;
+  const pool = IQ_ANALOGY_PAIRS.flatMap(pp=>[pp.b, pp.d]).filter(w=>w[0]!==answer[0]);
+  const distractors = iqSample(pool, 3);
+  const choices = iqShuffle([answer, ...distractors]).map(c=>`${c[0]} / ${c[1]}`);
+  return {
+    q_en, q_bm, choices, answer: `${answer[0]} / ${answer[1]}`,
+    explain_en: `${x[0]} relates to ${y[0]}, just like ${z[0]} relates to ${answer[0]}.`,
+    explain_bm: `${x[1]} berkaitan dengan ${y[1]}, sama seperti ${z[1]} berkaitan dengan ${answer[1]}.`,
+  };
+}
+function genLogicOrder(){
+  const names = iqSample(IQ_NAMES, 3);
+  const attr = IQ_ATTRS[iqRandInt(0, IQ_ATTRS.length-1)];
+  const askLowest = Math.random() < 0.5;
+  const q_en = `${names[0]} is ${attr.en} than ${names[1]}. ${names[1]} is ${attr.en} than ${names[2]}. Who is the ${askLowest?attr.lowest_en:attr.highest_en}?`;
+  const q_bm = `${names[0]} ${attr.bm} daripada ${names[1]}. ${names[1]} ${attr.bm} daripada ${names[2]}. Siapakah yang ${askLowest?attr.lowest_bm:attr.highest_bm}?`;
+  const answer = askLowest ? names[2] : names[0];
+  const choices = iqShuffle([...names, 'Cannot tell / Tidak dapat ditentukan']);
+  return {
+    q_en, q_bm, choices, answer,
+    explain_en: `Comparing all three, ${answer} is the ${askLowest?attr.lowest_en:attr.highest_en}.`,
+    explain_bm: `Membandingkan ketiga-tiga, ${answer} yang ${askLowest?attr.lowest_bm:attr.highest_bm}.`,
+  };
+}
+function genMultipleOddOut(){
+  const base = iqRandInt(2, 9);
+  const multiples = [];
+  let guard=0;
+  while(multiples.length < 3 && guard<50){
+    guard++;
+    const m = base*iqRandInt(1,12);
+    if(!multiples.includes(m)) multiples.push(m);
+  }
+  let nonMultiple, guard2=0;
+  do{ nonMultiple = iqRandInt(1, base*12); guard2++; } while((nonMultiple%base===0 || multiples.includes(nonMultiple)) && guard2<50);
+  if(nonMultiple%base===0) return null;
+  const options = iqShuffle([...multiples, nonMultiple]);
+  const q_en = `Which is NOT a multiple of ${base}: ${options.join(', ')}?`;
+  const q_bm = `Yang manakah BUKAN gandaan ${base}: ${options.join(', ')}?`;
+  return {
+    q_en, q_bm, choices: options.map(String), answer: String(nonMultiple),
+    explain_en: `Multiples of ${base} divide evenly by ${base}. ${nonMultiple} does not.`,
+    explain_bm: `Gandaan ${base} boleh dibahagi ${base} tanpa baki. ${nonMultiple} tidak boleh.`,
+  };
+}
+function genDoubleAddRiddle(){
+  const x = iqRandInt(2, 40);
+  const add = iqRandInt(1, 15);
+  const result = x*2+add;
+  const q_en = `A number is doubled, then ${add} is added, to get ${result}. What is the number?`;
+  const q_bm = `Suatu nombor digandakan, kemudian ${add} ditambah, untuk mendapat ${result}. Apakah nombor itu?`;
+  return {
+    q_en, q_bm, choices: iqNumChoices(x, 2, 4), answer: String(x),
+    explain_en: `Work backwards: ${result}−${add}=${result-add}, then ${result-add}÷2=${x}.`,
+    explain_bm: `Kerja ke belakang: ${result}−${add}=${result-add}, kemudian ${result-add}÷2=${x}.`,
+  };
+}
+function genShapeSidesRiddle(){
+  const shape = IQ_SHAPES_SIDES[iqRandInt(0, IQ_SHAPES_SIDES.length-1)];
+  const n = iqRandInt(2, 5);
+  const answer = shape.sides*n;
+  const q_en = `If a ${shape.en} has ${shape.sides} sides, how many sides do ${n} ${shape.en}s have altogether?`;
+  const q_bm = `Jika ${shape.bm} mempunyai ${shape.sides} sisi, berapakah jumlah sisi bagi ${n} ${shape.bm}?`;
+  return {
+    q_en, q_bm, choices: iqNumChoices(answer, shape.sides, 4), answer: String(answer),
+    explain_en: `One ${shape.en} has ${shape.sides} sides, so ${n} of them have ${shape.sides}×${n} = ${answer} sides.`,
+    explain_bm: `Satu ${shape.bm} mempunyai ${shape.sides} sisi, jadi ${n} daripadanya mempunyai ${shape.sides}×${n} = ${answer} sisi.`,
+  };
+}
+function genEmojiPattern(){
+  const set = IQ_EMOJI_SETS[iqRandInt(0, IQ_EMOJI_SETS.length-1)];
+  const [a,b] = set;
+  const unit = Math.random()<0.5 ? [a,b] : (Math.random()<0.5 ? [a,a,b] : [a,b,b]);
+  const seq = Array.from({length:8}, (_,i)=>unit[i%unit.length]);
+  const shown = seq.slice(0,7);
+  const answer = seq[7];
+  const q = `${shown.join(' ')} ?`;
+  const otherSymbols = ['🟨','⬛','🟢','🟠','🟣'].filter(s=>s!==a && s!==b);
+  const choices = iqShuffle([answer, a===answer?b:a, otherSymbols[0], otherSymbols[1]]);
+  return {
+    q_en: q, q_bm: q, choices, answer,
+    explain_en: `The pattern repeats every ${unit.length} symbols: ${unit.join(' ')}.`,
+    explain_bm: `Corak berulang setiap ${unit.length} simbol: ${unit.join(' ')}.`,
+  };
+}
+function genDayOfWeek(){
+  const days_en = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const days_bm = ['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
+  const startIdx = iqRandInt(0,6);
+  const add = iqRandInt(2,10);
+  const answerIdx = (startIdx+add)%7;
+  const q_en = `If today is ${days_en[startIdx]}, what day will it be in ${add} days?`;
+  const q_bm = `Jika hari ini ${days_bm[startIdx]}, hari apakah selepas ${add} hari?`;
+  const wrongIdxs = iqSample([0,1,2,3,4,5,6].filter(i=>i!==answerIdx), 3);
+  const choices = iqShuffle([answerIdx, ...wrongIdxs]).map(i=>`${days_en[i]} / ${days_bm[i]}`);
+  return {
+    q_en, q_bm, choices, answer:`${days_en[answerIdx]} / ${days_bm[answerIdx]}`,
+    explain_en: `Counting ${add} days forward from ${days_en[startIdx]} lands on ${days_en[answerIdx]}.`,
+    explain_bm: `Mengira ${add} hari dari ${days_bm[startIdx]} membawa kepada ${days_bm[answerIdx]}.`,
+  };
+}
+
+const IQ_GENERATORS = [genArithmeticSeq, genGeometricSeq, genLetterSeq, genOddOneOut, genAnalogy, genLogicOrder, genMultipleOddOut, genDoubleAddRiddle, genShapeSidesRiddle, genEmojiPattern, genDayOfWeek];
+
+/* ---- 20 hand-curated questions, kept for quality anchor ---- */
+const IQ_BANK_CURATED = [
   {q_en:"2, 4, 6, 8, ?", q_bm:"2, 4, 6, 8, ?", choices:["9","10","11","12"], answer:"10", explain_en:"Each number increases by 2 — this is the even number sequence.", explain_bm:"Setiap nombor bertambah 2 — ini ialah turutan nombor genap."},
   {q_en:"3, 6, 9, 12, ?", q_bm:"3, 6, 9, 12, ?", choices:["13","14","15","16"], answer:"15", explain_en:"Each number increases by 3 — these are multiples of 3.", explain_bm:"Setiap nombor bertambah 3 — ini ialah gandaan 3."},
   {q_en:"Which one is different: Apple, Banana, Carrot, Mango?", q_bm:"Yang manakah berbeza: Epal, Pisang, Lobak, Mangga?", choices:["Apple / Epal","Banana / Pisang","Carrot / Lobak","Mango / Mangga"], answer:"Carrot / Lobak", explain_en:"Apple, banana, and mango are fruits — a carrot is a vegetable.", explain_bm:"Epal, pisang, dan mangga ialah buah-buahan — lobak ialah sayur-sayuran."},
@@ -830,9 +1086,27 @@ const IQ_BANK = [
   {q_en:"Sarah is older than Mia. Mia is older than Ali. Who is the youngest?", q_bm:"Sarah lebih tua daripada Mia. Mia lebih tua daripada Ali. Siapakah paling muda?", choices:["Sarah","Mia","Ali","Cannot tell / Tidak dapat ditentukan"], answer:"Ali", explain_en:"Sarah > Mia > Ali in age, so Ali is the youngest of the three.", explain_bm:"Sarah > Mia > Ali mengikut umur, jadi Ali yang paling muda antara ketiga-tiga."},
 ];
 
-/* ============================================================
-   STATE
-============================================================ */
+const IQ_POOL_TARGET = 320;
+function buildIQBank(){
+  const seen = new Set();
+  const pool = [];
+  IQ_BANK_CURATED.forEach(q=>{ if(!seen.has(q.q_en)){ seen.add(q.q_en); pool.push(q); } });
+  let attempts=0;
+  while(pool.length < IQ_POOL_TARGET && attempts < 20000){
+    attempts++;
+    const gen = IQ_GENERATORS[iqRandInt(0, IQ_GENERATORS.length-1)];
+    let q;
+    try{ q = gen(); }catch(e){ q = null; }
+    if(!q || !q.choices || q.choices.length < 2 || !q.answer) continue;
+    if(!q.choices.includes(q.answer)) continue;
+    if(seen.has(q.q_en)) continue;
+    seen.add(q.q_en);
+    pool.push(q);
+  }
+  return pool;
+}
+const IQ_BANK = buildIQBank();
+
 let state = {
   nickname: '', grade: null, mode: null,
   quiz: [], qIndex: 0, score: 0, points: 0, answered: false,
@@ -1007,12 +1281,29 @@ function checkAdminPassword(){
 /* ============================================================
    CONFIG — GitHub only, localStorage
 ============================================================ */
+// Public, read-only fallback repo info. Safe to keep here (no token) —
+// lets ANY visitor's browser read the leaderboard even if they've never
+// opened ⚙️ Admin. Only writing (submitting scores, joining a lobby,
+// admin tools) still requires a token saved on that specific device.
+const PUBLIC_GH_DEFAULTS = { owner: 'JoePinkman99', repo: 'onlinequiz', branch: 'main' };
+
 function loadGithubConfig(){
+  const owner = localStorage.getItem('kk_owner')||'';
+  const repo = localStorage.getItem('kk_repo')||'';
+  if(owner && repo){
+    return { owner, repo, branch: localStorage.getItem('kk_branch')||'main', token: localStorage.getItem('kk_token')||'' };
+  }
+  // No config saved on this device — fall back to public read-only access.
+  return { owner: PUBLIC_GH_DEFAULTS.owner, repo: PUBLIC_GH_DEFAULTS.repo, branch: PUBLIC_GH_DEFAULTS.branch, token: '' };
+}
+// Raw values only (no fallback) — used to prefill the Admin config form
+// so it doesn't look "already connected" on a device that never saved one.
+function loadSavedGithubConfig(){
   return { owner: localStorage.getItem('kk_owner')||'', repo: localStorage.getItem('kk_repo')||'',
     branch: localStorage.getItem('kk_branch')||'main', token: localStorage.getItem('kk_token')||'' };
 }
 function fillConfigForm(){
-  const g=loadGithubConfig();
+  const g=loadSavedGithubConfig();
   $('cfg-owner').value=g.owner; $('cfg-repo').value=g.repo; $('cfg-branch').value=g.branch||'main'; $('cfg-token').value=g.token;
 }
 
@@ -1072,7 +1363,7 @@ async function testGithub(){
   }
 }
 function refreshConnectionDot(){
-  const g=loadGithubConfig();
+  const g=loadSavedGithubConfig();
   $('dot-github').classList.toggle('ok', !!(g.owner && g.repo && g.token));
 }
 
@@ -1081,7 +1372,9 @@ function refreshConnectionDot(){
 ============================================================ */
 function ghHeaders(extra){
   const c=loadGithubConfig();
-  return Object.assign({ 'Authorization': `token ${c.token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }, extra||{});
+  const base = { 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
+  if(c.token) base['Authorization'] = `token ${c.token}`; // omit entirely when read-only (no token) — a blank token header gets rejected
+  return Object.assign(base, extra||{});
 }
 function ghBaseUrl(path){ const c=loadGithubConfig(); return `https://api.github.com/repos/${c.owner}/${c.repo}/contents/${path}`; }
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
@@ -1176,7 +1469,7 @@ function startIQChallenge(){
   state.nickname = readNickname();
   if(!state.nickname){ alert('Please enter a nickname. ／ Sila masukkan nama.'); return; }
   state.mode='iq'; state.grade='iq'; state.roomGroup=null;
-  beginQuiz(pickRandom(IQ_BANK, IQ_BANK.length)); // shuffle order, use all 20
+  beginQuiz(pickRandom(IQ_BANK, IQ_QUIZ_LENGTH)); // 20 random questions drawn fresh from the full pool
 }
 
 async function joinCompetition(){
